@@ -1,0 +1,89 @@
+/* ============================================================================
+ * CONSOLE PANEL
+ * ============================================================================ */
+
+#console-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    background: var(--bg-darker);
+    border-top: 1px solid var(--border);
+    display: none;
+    flex-direction: column;
+    z-index: 100;
+}
+
+#console-panel.active {
+    display: flex;
+}
+
+.console-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+}
+
+.console-header h3 {
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.console-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.console-controls button {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--button-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.console-controls button:hover {
+    background: var(--button-hover);
+}
+
+.console-content {
+    flex: 1;
+    padding: 12px 16px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+}
+
+.log-entry {
+    margin-bottom: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.log-timestamp {
+    color: var(--text-secondary);
+    margin-right: 8px;
+}
+
+.log-info {
+    color: var(--text-primary);
+}
+
+.log-error {
+    color: var(--error);
+}
+
+.log-warning {
+    color: var(--warning);
+}
+
+.log-success {
+    color: var(--success);
+}

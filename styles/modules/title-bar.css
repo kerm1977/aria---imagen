@@ -1,0 +1,70 @@
+/* ============================================================================
+ * TITLE BAR
+ * ============================================================================ */
+
+.title-bar {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-app-region: drag;
+    flex-shrink: 0;
+}
+
+.title-bar .window-title {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+}
+
+.title-bar .window-title svg {
+    margin-right: 8px;
+}
+
+.title-bar .window-controls {
+    display: flex;
+    gap: 8px;
+    -webkit-app-region: no-drag;
+}
+
+.title-bar .window-controls button {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: var(--button-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.title-bar .window-controls button:hover {
+    background: var(--button-hover);
+}
+
+.title-bar .window-controls button#winClose:hover {
+    background: var(--error);
+}
+
+.title-bar .theme-toggle {
+    -webkit-app-region: no-drag;
+    background: var(--button-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-right: 12px;
+}
+
+.title-bar .theme-toggle:hover {
+    background: var(--button-hover);
+}

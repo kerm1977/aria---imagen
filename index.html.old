@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARIA - CONVERTER</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Title Bar - ARIA Music style -->
+<div class="title-bar">
+  <div class="window-title">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--accent)" class="title-icon"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+    ARIA - CONVERTER
+  </div>
+  <div class="title-bar-controls">
+    <button class="title-bar-btn title-bar-theme" id="titleBarTheme" title="Cambiar tema">☀</button>
+    <button class="title-bar-btn title-bar-info" id="btn-info" title="Información">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    </button>
+    <button class="title-bar-btn title-bar-minimize" id="winMinimize" title="Minimizar"></button>
+    <button class="title-bar-btn title-bar-maximize" id="winMaximize" title="Maximizar"></button>
+    <button class="title-bar-btn title-bar-close" id="winClose" title="Cerrar"></button>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div id="toolbar">
+  <button class="btn btn-secondary" id="btn-open-file">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Abrir Archivo
+  </button>
+
+  <button class="btn btn-secondary" id="btn-open-folder">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    Abrir Carpeta
+  </button>
+
+  <button class="btn btn-secondary" id="btn-select-output">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    Guardar en...
+  </button>
+
+  <div class="separator"></div>
+
+  <button class="btn btn-secondary" id="btn-settings">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Opciones
+  </button>
+
+  <button class="btn btn-secondary" id="btn-console">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+    Consola
+  </button>
+
+  <div class="separator"></div>
+
+  <button class="btn btn-primary" id="btn-convert" disabled>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    Convertir
+  </button>
+</div>
+
+<!-- Main -->
+<div id="main">
+  <!-- Left panel - Conversion types -->
+  <div id="conversion-panel">
+    <div id="conversion-panel-header">
+      <h3>Tipo de Conversión</h3>
+    </div>
+    <div id="conversion-list">
+      <div class="conversion-item active" data-type="video">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+        <span>Video</span>
+      </div>
+      <div class="conversion-item" data-type="audio">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Audio</span>
+      </div>
+      <div class="conversion-item" data-type="extract-audio">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <span>Extraer Audio</span>
+      </div>
+      <div class="conversion-item" data-type="image">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Imagen</span>
+      </div>
+      <div class="conversion-item" data-type="document">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Documento</span>
+      </div>
+      <div class="conversion-item" data-type="spreadsheet">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        <span>Hoja de Cálculo</span>
+      </div>
+      <div class="conversion-item" data-type="presentation">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Presentación</span>
+      </div>
+      <div class="conversion-item" data-type="compress">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        <span>Comprimir Imagen</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel - Settings and preview -->
+  <div id="right-panel">
+    <!-- Settings -->
+    <div id="settings-panel">
+      <h3>Configuración</h3>
+      <div id="settings-content">
+        <div id="empty-settings">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>Selecciona un tipo de conversión y abre un archivo</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div id="status-bar">
+      <span class="status-msg" id="status-msg">Listo. Abre un archivo para comenzar.</span>
+      <span class="status-stats" id="status-stats"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Configuración de la Aplicación</h2>
+      <button class="modal-close" id="close-settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-section">
+        <h3>Control de Conversión</h3>
+        <div class="control-buttons">
+          <button class="btn btn-primary" id="modal-btn-convert" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Convertir
+          </button>
+          <button class="btn btn-secondary" id="modal-btn-pause" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            Pausar
+          </button>
+          <button class="btn btn-secondary" id="modal-btn-resume" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Reanudar
+          </button>
+          <button class="btn btn-danger" id="modal-btn-stop" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+            Detener
+          </button>
+          <button class="btn btn-secondary" id="modal-btn-clear">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>General</h3>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="chk-open-folder">
+            Abrir carpeta automáticamente al terminar
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Conversiones simultáneas</label>
+          <select class="setting-select" id="concurrent-conversions">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Optimización para Videos Grandes</h3>
+        <div class="setting-item">
+          <label class="setting-label">Preset de velocidad</label>
+          <select class="setting-select" id="ffmpeg-preset">
+            <option value="medium">Medio (balance calidad/velocidad)</option>
+            <option value="fast">Rápido</option>
+            <option value="veryfast">Muy rápido</option>
+            <option value="superfast">Súper rápido</option>
+            <option value="ultrafast">Ultra rápido (menor calidad)</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Threads</label>
+          <select class="setting-select" id="ffmpeg-threads">
+            <option value="0">Auto</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="16">16</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="chk-hardware-accel">
+            Aceleración por hardware (NVENC/QSV/VAAPI)
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="chk-fast-decode">
+            Optimizar para decodificación rápida
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal">
+  <div class="modal-content modal-confirm">
+    <div class="modal-header">
+      <h2>Confirmar Acción</h2>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message">¿Estás seguro de que deseas continuar?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="confirm-cancel">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Console/Logs Panel -->
+<div id="console-panel" class="console-panel">
+  <div class="console-header">
+    <h3>Consola de Logs</h3>
+    <div class="console-controls">
+      <button class="btn btn-secondary btn-sm" id="btn-copy-logs">Copiar</button>
+      <button class="btn btn-secondary btn-sm" id="btn-clear-logs">Limpiar</button>
+      <button class="btn btn-secondary btn-sm" id="btn-close-console">Cerrar</button>
+    </div>
+  </div>
+  <div class="console-content" id="console-content">
+    <div class="log-entry log-info">[INFO] Sistema de logs iniciado</div>
+  </div>
+</div>
+
+<!-- Mini Player Modal -->
+<div id="mini-player-modal" class="modal">
+  <div class="modal-content modal-player">
+    <div class="modal-header">
+      <h2 id="player-title">Previsualización</h2>
+      <button class="modal-close" id="close-player">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="player-container">
+        <video id="video-player" class="media-player hidden-player" controls></video>
+        <audio id="audio-player" class="media-player hidden-player" controls></audio>
+        <img id="image-preview" class="image-preview hidden-player">
+        <div id="no-preview" class="no-preview">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>No disponible para previsualización</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Context Menu -->
+<div id="context-menu" class="context-menu hidden-menu">
+  <div class="context-menu-item" data-action="delete">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    <span>Eliminar de la lista</span>
+  </div>
+  <div class="context-menu-item" data-action="open-location">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    <span>Abrir Ubicación</span>
+  </div>
+  <div class="context-menu-item" data-action="pause">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    <span>Pausar</span>
+  </div>
+  <div class="context-menu-item" data-action="resume">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <span>Reanudar</span>
+  </div>
+  <div class="context-menu-item" data-action="view">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <span>Ver</span>
+  </div>
+  <div class="context-menu-item" data-action="info">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <span>Info</span>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="confirm-title">Confirmar</h2>
+      <button class="modal-close" id="close-confirm">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message">¿Estás seguro?</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="confirm-no">No</button>
+        <button class="btn btn-primary" id="confirm-yes">Sí</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Modal -->
+<div id="info-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Información del Archivo</h2>
+      <button class="modal-close" id="close-info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="file-info-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- About Modal -->
+<div id="about-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Información</h2>
+      <button class="modal-close" id="close-about">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="about-content">
+        <div class="about-icon">
+          <svg viewBox="0 0 24 24" width="64" height="64" fill="var(--accent)"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+        </div>
+        <h3>ARIA - CONVERTER</h3>
+        <div class="about-info">
+          <div class="info-row">
+            <span class="info-label">Creado en:</span>
+            <span class="info-value">Costa Rica</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Desarrollado por:</span>
+            <span class="info-value">La Tribu de Los Libre</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Contacto:</span>
+            <span class="info-value">lthikingcr@gmail.com</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+
+</body>
+</html>

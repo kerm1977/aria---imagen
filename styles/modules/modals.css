@@ -1,0 +1,159 @@
+/* ============================================================================
+ * MODALS
+ * ============================================================================ */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    color: var(--accent);
+    font-size: 1.3rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    color: var(--text-primary);
+}
+
+.modal-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Settings modal specific */
+#settings-modal .modal-content {
+    width: 700px;
+}
+
+.settings-section {
+    margin-bottom: 24px;
+}
+
+.settings-section h4 {
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.settings-section p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+/* Confirm modal */
+#confirm-modal .modal-content {
+    width: 400px;
+    text-align: center;
+}
+
+#confirm-message {
+    margin: 20px 0;
+    color: var(--text-primary);
+}
+
+#confirm-yes,
+#confirm-no {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+#confirm-yes {
+    background: var(--accent);
+    color: white;
+}
+
+#confirm-no {
+    background: var(--button-bg);
+    color: var(--text-primary);
+}
+
+/* Info modal */
+#info-modal .modal-content {
+    width: 500px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.info-value {
+    color: var(--text-primary);
+}
+
+/* About modal */
+#about-modal .modal-content {
+    width: 500px;
+    text-align: center;
+}
+
+#about-modal h3 {
+    color: var(--accent);
+    margin-bottom: 16px;
+}
+
+#about-modal p {
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+#about-modal .creator {
+    color: var(--accent);
+    font-weight: bold;
+}

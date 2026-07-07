@@ -1,0 +1,120 @@
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Opciones de Conversión</h3>
+      <button class="modal-close" id="close-settings">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-section">
+        <h4>Conversiones Simultáneas</h4>
+        <p>Número de archivos a convertir al mismo tiempo</p>
+        <select id="concurrent-conversions">
+          <option value="1">1 archivo</option>
+          <option value="2" selected>2 archivos</option>
+          <option value="3">3 archivos</option>
+          <option value="4">4 archivos</option>
+          <option value="5">5 archivos</option>
+        </select>
+      </div>
+      <div class="settings-section">
+        <h4>FFmpeg Optimizaciones</h4>
+        <p>Preset de codificación</p>
+        <select id="ffmpeg-preset">
+          <option value="ultrafast">Ultra Rápido</option>
+          <option value="superfast">Súper Rápido</option>
+          <option value="veryfast">Muy Rápido</option>
+          <option value="faster">Rápido</option>
+          <option value="fast">Normal</option>
+          <option value="medium" selected>Medio</option>
+          <option value="slow">Lento</option>
+          <option value="slower">Más Lento</option>
+          <option value="veryslow">Muy Lento</option>
+        </select>
+        <p style="margin-top: 12px;">Hilos de procesamiento (0 = automático)</p>
+        <select id="ffmpeg-threads">
+          <option value="0" selected>Automático</option>
+          <option value="1">1 hilo</option>
+          <option value="2">2 hilos</option>
+          <option value="4">4 hilos</option>
+          <option value="8">8 hilos</option>
+        </select>
+        <p style="margin-top: 12px;">
+          <label>
+            <input type="checkbox" id="chk-hardware-accel"> Aceleración por hardware (NVIDIA/Intel)
+          </label>
+        </p>
+        <p style="margin-top: 8px;">
+          <label>
+            <input type="checkbox" id="chk-fast-decode"> Decodificación rápida
+          </label>
+        </p>
+      </div>
+      <div class="settings-section">
+        <h4>Archivos</h4>
+        <p>
+          <label>
+            <input type="checkbox" id="chk-open-folder" checked> Abrir carpeta de salida al terminar
+          </label>
+        </p>
+        <button class="btn btn-danger" id="modal-btn-clear">Eliminar todos los archivos</button>
+      </div>
+      <div class="settings-section">
+        <h4>Control de Conversión</h4>
+        <button class="btn btn-secondary" id="modal-btn-pause" disabled>Pausar</button>
+        <button class="btn btn-secondary" id="modal-btn-resume" disabled>Reanudar</button>
+        <button class="btn btn-danger" id="modal-btn-stop" disabled>Detener</button>
+      </div>
+      <div class="settings-section">
+        <h4>Conversión</h4>
+        <button class="btn btn-primary" id="modal-btn-convert" disabled>Convertir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Confirmar</h3>
+      <button class="modal-close" id="close-confirm">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message"></p>
+    </div>
+    <div class="modal-footer">
+      <button id="confirm-yes">Sí</button>
+      <button id="confirm-no">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- Info Modal -->
+<div id="info-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Información del Archivo</h3>
+      <button class="modal-close" id="close-info">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="file-info-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- About Modal -->
+<div id="about-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Acerca de</h3>
+      <button class="modal-close" id="close-about">×</button>
+    </div>
+    <div class="modal-body">
+      <h3>ARIA - CONVERTER</h3>
+      <p>Conversor multimedia universal</p>
+      <p>Versión 1.0.0</p>
+      <p class="creator">Creado por: kerm1977</p>
+    </div>
+  </div>
+</div>

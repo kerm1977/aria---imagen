@@ -1,0 +1,60 @@
+/* ============================================================================
+ * CSS VARIABLES - THEME SYSTEM
+ * ============================================================================ */
+
+:root {
+    --bg-dark: #1a1a1a;
+    --bg-darker: #0d0d0d;
+    --bg-card: #252525;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent: #e91e63;
+    --accent-hover: #f06292;
+    --success: #00e676;
+    --error: #ff5252;
+    --warning: #ffab40;
+    --border: #333333;
+    --button-bg: #3a3a3a;
+    --button-hover: #4a4a4a;
+}
+
+[data-theme="light"] {
+    --bg-dark: #f8f4f8;
+    --bg-darker: #f0e8f0;
+    --bg-card: #ffffff;
+    --text-primary: #4a4a4a;
+    --text-secondary: #888888;
+    --accent: #e91e63;
+    --accent-hover: #c2185b;
+    --success: #81c784;
+    --error: #e57373;
+    --warning: #ffb74d;
+    --border: #e0e0e0;
+    --button-bg: #f5f5f5;
+    --button-hover: #eeeeee;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    border-radius: 14px;
+    overflow: hidden;
+    background: transparent;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 0 0 1px var(--bg-darker) inset;
+}
