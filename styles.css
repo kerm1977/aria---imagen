@@ -1,398 +1,783 @@
-/* ── CSS Variables - ARIA Music Theme ── */
-:root {
-  --transition: 0.2s ease;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-}
+/* ============================================================================
+ * ARIA CONVERTER - STYLESHEET
+ * ============================================================================
+ * Theme: Dark/Light theme with pink accent (#e91e63) - matches ARIA Descompresor
+ * Layout: CSS Grid with 2-column layout (conversion types left, settings right)
+ * Typography: Segoe UI, Tahoma, Geneva, Verdana, sans-serif
+ * ============================================================================ */
 
-[data-theme="dark"] {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-card: #0f3460;
-  --bg-hover: #1a1a2e;
-  --text-primary: #eaeaea;
-  --text-secondary: #a0a0a0;
-  --text-muted: #707070;
-  --border: #2a2a4a;
-  --accent: #e91e63;
-  --accent-glow: rgba(233, 30, 99, 0.15);
-  --danger: #ff5252;
-  --success: #4caf50;
-  --warning: #ff9800;
+/* ============================================================================
+ * CSS VARIABLES - THEME SYSTEM
+ * ============================================================================
+ * These variables control the color scheme for both dark and light themes.
+ * The theme is switched by adding/removing the data-theme="light" attribute on the HTML element.
+ * ============================================================================ */
+
+:root {
+    /* Dark theme (default) - matches ARIA Descompresor */
+    --bg-dark: #1a1a1a;
+    --bg-darker: #0d0d0d;
+    --bg-card: #252525;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent: #e91e63;
+    --accent-hover: #f06292;
+    --success: #00e676;
+    --error: #ff5252;
+    --warning: #ffab40;
+    --border: #333333;
+    --button-bg: #3a3a3a;
+    --button-hover: #4a4a4a;
 }
 
 [data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f5;
-  --bg-card: #ffffff;
-  --bg-hover: #f0f0f0;
-  --text-primary: #1a1a1a;
-  --text-secondary: #606060;
-  --text-muted: #909090;
-  --border: #e0e0e0;
-  --accent: #e91e63;
-  --accent-glow: rgba(233, 30, 99, 0.1);
-  --danger: #f44336;
-  --success: #4caf50;
-  --warning: #ff9800;
+    /* Light theme - pastel colors */
+    --bg-dark: #f8f4f8;
+    --bg-darker: #f0e8f0;
+    --bg-card: #ffffff;
+    --text-primary: #4a4a4a;
+    --text-secondary: #888888;
+    --accent: #e91e63;
+    --accent-hover: #c2185b;
+    --success: #81c784;
+    --error: #e57373;
+    --warning: #ffb74d;
+    --border: #e0e0e0;
+    --button-bg: #f5f5f5;
+    --button-hover: #eeeeee;
+}
+
+/* ============================================================================
+ * RESET AND BASE STYLES
+ * ============================================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    border-radius: 14px;
+    overflow: hidden;
+    background: transparent;
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  font-size: 15px;
-  border: 1px solid #ff00ff;
-  transition: border-color 2s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 0 0 1px var(--bg-darker) inset;
 }
 
-/* ── Title Bar - ARIA Music style ── */
+/* ============================================================================
+ * TITLE BAR - Custom Title Bar
+ * ============================================================================ */
+
 .title-bar {
-  background-color: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  -webkit-app-region: drag;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-app-region: drag;
+    flex-shrink: 0;
 }
 
-.window-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
+.title-bar .window-title {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
 }
 
 .title-bar-controls {
-  display: flex;
-  gap: 8px;
-  -webkit-app-region: no-drag;
+    -webkit-app-region: no-drag;
+    display: flex;
+    gap: 8px;
 }
 
 .title-bar-btn {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  transition: opacity var(--transition);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    border: none;
+    padding: 0;
 }
 
-.title-bar-btn:hover { opacity: 0.8; }
+.title-bar-btn:hover {
+    opacity: 0.8;
+}
 
 .title-bar-theme {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
+    background-color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 8px;
+    width: 12px;
+    height: 12px;
 }
 
-.title-bar-minimize { background-color: #ffbd2e; }
-.title-bar-maximize { background-color: #28c940; }
-.title-bar-close { background-color: #ff5252; }
+.title-bar-close {
+    background-color: #ff5252;
+}
 
-/* ── Toolbar ── */
+.title-bar-minimize {
+    background-color: #ffab40;
+}
+
+.title-bar-maximize {
+    background-color: #00e676;
+}
+
+/* ============================================================================
+ * TOOLBAR
+ * ============================================================================ */
+
 #toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+    background: var(--bg-card);
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
-.separator { flex: 1; }
+#toolbar button,
+#toolbar .separator {
+    -webkit-app-region: no-drag;
+}
 
-/* ── Buttons ── */
+.separator {
+    flex: 1;
+}
+
+.toolbar-options {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.toolbar-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.toolbar-checkbox input {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
+.toolbar-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.toolbar-select select {
+    background: var(--button-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.toolbar-select select:hover {
+    border-color: var(--accent);
+}
+
+/* ============================================================================
+ * BUTTONS
+ * ============================================================================ */
+
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: var(--button-bg);
+    color: var(--text-primary);
 }
 
-.btn:active { transform: scale(0.97); }
+.btn:hover {
+    background: var(--button-hover);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-danger {
+    background: #ff5252;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #ff1744;
+}
 
 .btn-primary {
-  background: #ff1a6e;
-  color: #ffffff;
-  box-shadow: 0 4px 20px rgba(255, 26, 110, 1), 0 0 0 2px rgba(255, 255, 255, 0.3);
-  border: 2px solid #ff5c8d;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  position: relative;
-  z-index: 100;
-  filter: brightness(1.3) saturate(1.5);
+    background: var(--accent);
+    color: white;
 }
+
 .btn-primary:hover {
-  background: #d5006d;
-  box-shadow: 0 6px 25px rgba(213, 0, 109, 1), 0 0 0 2px rgba(255, 255, 255, 0.5);
-  border-color: #ff80ab;
-  transform: translateY(-2px);
-  filter: brightness(1.35) saturate(1.6);
+    background: var(--accent-hover);
 }
-
-[data-theme="light"] .btn-primary {
-  box-shadow: none;
-  border: none;
-}
-[data-theme="light"] .btn-primary:hover {
-  box-shadow: none;
-  border: none;
-}
-
-.btn-secondary {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-}
-.btn-secondary:hover { background: var(--bg-hover); border-color: var(--accent); color: var(--accent); }
 
 .btn:disabled {
-  cursor: not-allowed;
-  transform: none;
-  filter: grayscale(0.5);
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: var(--bg-darker);
 }
 
-/* ── Main layout ── */
+.btn:disabled:hover {
+    transform: none;
+    background: var(--bg-darker);
+}
+
+/* ============================================================================
+ * MAIN LAYOUT
+ * ============================================================================ */
+
 #main {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  grid-template-rows: 1fr;
-  flex: 1;
-  overflow: hidden;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: 1fr;
+    flex: 1;
+    overflow: hidden;
+    padding: 20px;
+    gap: 15px;
+    box-sizing: border-box;
 }
 
-/* ── Conversion panel ── */
+/* ============================================================================
+ * CONVERSION PANEL (Left)
+ * ============================================================================ */
+
 #conversion-panel {
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--button-bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 #conversion-panel-header {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
+    padding: 12px 15px;
+    background: var(--bg-darker);
+    font-weight: bold;
+    border-bottom: 1px solid var(--button-bg);
+    flex-shrink: 0;
 }
 
 #conversion-panel-header h3 {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
 }
 
 #conversion-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 5px;
 }
 
 .conversion-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background var(--transition);
-  color: var(--text-primary);
-  margin-bottom: 4px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+    color: var(--text-primary);
 }
 
-.conversion-item:hover { background: var(--bg-hover); }
+.conversion-item:hover {
+    background: var(--button-bg);
+}
+
 .conversion-item.active {
-  background: var(--accent-glow);
-  color: var(--accent);
-  font-weight: 600;
+    background: var(--accent);
+    color: white;
 }
 
 .conversion-item svg {
-  flex-shrink: 0;
+    flex-shrink: 0;
 }
 
-/* ── Right panel ── */
+/* ============================================================================
+ * RIGHT PANEL
+ * ============================================================================ */
+
 #right-panel {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* ── Settings panel ── */
+/* ============================================================================
+ * SETTINGS PANEL
+ * ============================================================================ */
+
 #settings-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 14px 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 15px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--button-bg);
 }
 
 #settings-panel h3 {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
-  flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    flex-shrink: 0;
 }
 
 #settings-content {
-  flex: 1;
-  overflow-y: auto;
+    flex: 1;
+    overflow-y: auto;
 }
 
 #empty-settings {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-muted);
-  text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+    text-align: center;
 }
 
 #empty-settings svg {
-  margin-bottom: 12px;
-  opacity: 0.5;
+    margin-bottom: 12px;
+    opacity: 0.5;
 }
 
 #empty-settings p {
-  font-size: 13px;
+    font-size: 13px;
 }
 
-/* ── Status bar ── */
-#status-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 18px;
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
+/* ============================================================================
+ * SETTINGS FORM ELEMENTS
+ * ============================================================================ */
 
-#status-bar .status-msg {
-  flex: 1;
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-#status-bar .status-msg.success { color: var(--accent); }
-#status-bar .status-msg.error { color: var(--danger); }
-
-#status-bar .status-stats {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-/* ── Toast notifications ── */
-#toast-container {
-  position: fixed;
-  bottom: 50px;
-  right: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 1000;
-}
-
-.toast {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  animation: slideIn 0.3s ease;
-  max-width: 300px;
-}
-
-.toast.success { border-left-color: var(--success); }
-.toast.error { border-left-color: var(--danger); }
-
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-/* ── Settings form elements ── */
 .setting-group {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .setting-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-  display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: block;
 }
 
 .setting-select,
 .setting-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-size: 14px;
-  transition: border-color var(--transition);
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-darker);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.3s;
+    outline: none;
 }
 
 .setting-select:focus,
 .setting-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-glow);
+    border-color: var(--accent);
 }
 
 .setting-range {
-  width: 100%;
-  margin-top: 8px;
+    width: 100%;
+    margin-top: 8px;
 }
 
 .file-info {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  margin-bottom: 16px;
+    background: var(--bg-darker);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
 }
 
 .file-info-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-  word-break: break-all;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    word-break: break-all;
 }
 
 .file-info-details {
-  font-size: 12px;
-  color: var(--text-muted);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ============================================================================
+ * FILE LIST WITH PROGRESS BARS
+ * ============================================================================ */
+
+.file-list {
+    background: var(--bg-darker);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.file-item {
+    padding: 10px;
+    border-radius: 4px;
+    background: var(--bg-card);
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+}
+
+.file-item:last-child {
+    margin-bottom: 0;
+}
+
+.file-item-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+
+.file-item-status {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.file-item-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--button-bg);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+    min-width: 35px;
+    text-align: right;
+}
+
+/* ============================================================================
+ * STATUS BAR
+ * ============================================================================ */
+
+#status-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 18px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 15px;
+    border-radius: 8px;
+}
+
+#status-bar .status-msg {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+#status-bar .status-msg.success {
+    color: var(--success);
+}
+
+#status-bar .status-msg.error {
+    color: var(--error);
+}
+
+#status-bar .status-stats {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* ============================================================================
+ * MODAL
+ * ============================================================================ */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--button-hover);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.settings-section {
+    margin-bottom: 24px;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.settings-section h3 {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.control-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.control-buttons .btn {
+    flex: 1;
+    min-width: 80px;
+    justify-content: center;
+}
+
+.setting-item {
+    margin-bottom: 16px;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-item .setting-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.setting-item .setting-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.setting-item .setting-select {
+    width: 100%;
+    background: var(--button-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.setting-item .setting-select:hover {
+    border-color: var(--accent);
+}
+
+.modal-confirm {
+    max-width: 400px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.modal-footer .btn {
+    min-width: 100px;
+}
+
+.modal-body p {
+    margin: 0;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ============================================================================
+ * TOAST NOTIFICATIONS
+ * ============================================================================ */
+
+#toast-container {
+    position: fixed;
+    bottom: 50px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1000;
+}
+
+.toast {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+    max-width: 300px;
+}
+
+.toast.success {
+    border-left-color: var(--success);
+}
+
+.toast.error {
+    border-left-color: var(--error);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ============================================================================
+ * CUSTOM SCROLLBARS
+ * ============================================================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--button-bg);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--button-hover);
 }

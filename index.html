@@ -12,7 +12,7 @@
 <!-- Title Bar - ARIA Music style -->
 <div class="title-bar">
   <div class="window-title">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--accent)" style="vertical-align:middle;margin-right:8px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--accent)" class="title-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
     ARIA - CONVERTER
   </div>
   <div class="title-bar-controls">
@@ -28,6 +28,23 @@
   <button class="btn btn-secondary" id="btn-open-file">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
     Abrir Archivo
+  </button>
+
+  <button class="btn btn-secondary" id="btn-open-folder">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    Abrir Carpeta
+  </button>
+
+  <button class="btn btn-secondary" id="btn-select-output">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    Guardar en...
+  </button>
+
+  <div class="separator"></div>
+
+  <button class="btn btn-secondary" id="btn-settings">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Opciones
   </button>
 
   <div class="separator"></div>
@@ -97,6 +114,118 @@
 <!-- Toast container -->
 <div id="toast-container"></div>
 
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Configuración de la Aplicación</h2>
+      <button class="modal-close" id="close-settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-section">
+        <h3>Control de Conversión</h3>
+        <div class="control-buttons">
+          <button class="btn btn-primary" id="modal-btn-convert" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Convertir
+          </button>
+          <button class="btn btn-secondary" id="modal-btn-pause" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            Pausar
+          </button>
+          <button class="btn btn-secondary" id="modal-btn-resume" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Reanudar
+          </button>
+          <button class="btn btn-danger" id="modal-btn-stop" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+            Detener
+          </button>
+          <button class="btn btn-secondary" id="modal-btn-clear">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>General</h3>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="chk-open-folder">
+            Abrir carpeta automáticamente al terminar
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Conversiones simultáneas</label>
+          <select class="setting-select" id="concurrent-conversions">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Optimización para Videos Grandes</h3>
+        <div class="setting-item">
+          <label class="setting-label">Preset de velocidad</label>
+          <select class="setting-select" id="ffmpeg-preset">
+            <option value="medium">Medio (balance calidad/velocidad)</option>
+            <option value="fast">Rápido</option>
+            <option value="veryfast">Muy rápido</option>
+            <option value="superfast">Súper rápido</option>
+            <option value="ultrafast">Ultra rápido (menor calidad)</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Threads</label>
+          <select class="setting-select" id="ffmpeg-threads">
+            <option value="0">Auto</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="16">16</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="chk-hardware-accel">
+            Aceleración por hardware (NVENC/QSV/VAAPI)
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="chk-fast-decode">
+            Optimizar para decodificación rápida
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal">
+  <div class="modal-content modal-confirm">
+    <div class="modal-header">
+      <h2>Confirmar Acción</h2>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message">¿Estás seguro de que deseas continuar?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="confirm-cancel">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <script src="renderer.js"></script>
+
 </body>
 </html>
