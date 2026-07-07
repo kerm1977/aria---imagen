@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ARIA Converter
+Comment=Conversor de archivos multimedia - Video, Audio, Imágenes y Documentos
+Exec=/opt/aria-converter/aria-converter
+Icon=/opt/aria-converter/icon.png
+Terminal=false
+Categories=AudioVideo;AudioVideoEditing;Utility;
+Keywords=converter;video;audio;image;document;compression;
+StartupNotify=true

@@ -6,7 +6,14 @@
   "scripts": {
     "start": "electron ."
   },
-  "keywords": ["converter", "ffmpeg", "video", "audio", "image", "pdf"],
+  "keywords": [
+    "converter",
+    "ffmpeg",
+    "video",
+    "audio",
+    "image",
+    "pdf"
+  ],
   "author": "kerm1977",
   "license": "MIT",
   "devDependencies": {
@@ -15,7 +22,8 @@
   "dependencies": {
     "@electron/remote": "^2.0.12",
     "fluent-ffmpeg": "^2.1.2",
-    "sharp": "^0.33.0",
-    "libreoffice-convert": "^1.6.0"
+    "libreoffice-convert": "^1.6.0",
+    "pdf2docx": "^0.0.0",
+    "sharp": "^0.33.0"
   }
 }

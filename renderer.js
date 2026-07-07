@@ -45,6 +45,20 @@ document.getElementById('btn-clear-logs').addEventListener('click', () => {
   addLog('Logs limpiados', 'info');
 });
 
+document.getElementById('btn-copy-logs').addEventListener('click', () => {
+  const consoleContent = document.getElementById('console-content');
+  const logText = consoleContent.innerText;
+  if (logText.trim()) {
+    navigator.clipboard.writeText(logText).then(() => {
+      showToast('Logs copiados al portapapeles', 'success');
+    }).catch(err => {
+      showToast('Error al copiar logs: ' + err.message, 'error');
+    });
+  } else {
+    showToast('No hay logs para copiar', 'warning');
+  }
+});
+
 // Intercept console.log, console.error, console.warn
 const originalLog = console.log;
 const originalError = console.error;
@@ -178,39 +192,50 @@ setInterval(changeNeonBorder, 2000);
 // ── Conversion type selection ────────────────────────────────────────────────
 const conversionItems = document.querySelectorAll('.conversion-item');
 conversionItems.forEach(item => {
-  item.addEventListener('click', () => {
+  item.addEventListener('click', async () => {
     conversionItems.forEach(i => i.classList.remove('active'));
     item.classList.add('active');
     currentConversionType = item.dataset.type;
     updateSettingsPanel();
+    console.log(`[TAB] Cambiado a: ${currentConversionType}`);
+    // Auto-open file dialog for this conversion type
+    await openFileDialog();
   });
 });
 
 // ── File selection ───────────────────────────────────────────────────────────
-document.getElementById('btn-open-file').addEventListener('click', async () => {
+async function openFileDialog() {
   const dialogOptions = {
     properties: ['openFile', 'multiSelections'],
-    filters: getFileFilters()
+    filters: [{ name: 'Todos los archivos', extensions: ['*'] }, ...getFileFilters()]
   };
 
-  if (lastPath) {
-    dialogOptions.defaultPath = lastPath;
-  }
+  if (lastPath) dialogOptions.defaultPath = lastPath;
 
+  console.log(`[FILE-DIALOG] Abriendo diálogo para: ${currentConversionType}`);
   const result = await window.api.showOpenDialog(dialogOptions);
 
   if (!result.canceled && result.filePaths.length > 0) {
-    currentFiles = result.filePaths.map(path => ({
-      path: path,
-      name: getFileName(path),
+    const newFiles = result.filePaths.map(p => ({
+      path: p,
+      name: getFileName(p),
       progress: 0,
       status: 'pending'
     }));
+    currentFiles = [...currentFiles, ...newFiles];
     lastPath = result.filePaths[0].substring(0, result.filePaths[0].lastIndexOf('/'));
     document.getElementById('btn-convert').disabled = false;
+    document.getElementById('modal-btn-convert').disabled = false;
     updateSettingsPanel();
-    showToast(`${currentFiles.length} archivo(s) cargado(s)`);
+    console.log(`[FILE-DIALOG] ${newFiles.length} archivo(s) cargado(s): ${newFiles.map(f => f.name).join(', ')}`);
+    showToast(`${newFiles.length} archivo(s) cargado(s)`);
+  } else {
+    console.log(`[FILE-DIALOG] Cancelado por el usuario`);
   }
+}
+
+document.getElementById('btn-open-file').addEventListener('click', async () => {
+  await openFileDialog();
 });
 
 // ── Folder selection ───────────────────────────────────────────────────────────
@@ -271,27 +296,43 @@ function getFileFilters() {
   switch (currentConversionType) {
     case 'video':
       return [
-        { name: 'Videos', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'] }
+        { name: 'Videos', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'] },
+        { name: 'Todos los archivos', extensions: ['*'] }
       ];
     case 'audio':
       return [
-        { name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'] }
+        { name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'] },
+        { name: 'Todos los archivos', extensions: ['*'] }
       ];
     case 'extract-audio':
       return [
-        { name: 'Videos', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'] }
+        { name: 'Videos', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'] },
+        { name: 'Todos los archivos', extensions: ['*'] }
       ];
     case 'image':
       return [
-        { name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'] }
+        { name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'] },
+        { name: 'Todos los archivos', extensions: ['*'] }
       ];
     case 'document':
       return [
-        { name: 'Documentos', extensions: ['docx', 'doc', 'odt', 'txt', 'rtf'] }
+        { name: 'Documentos de texto', extensions: ['docx', 'doc', 'odf', 'txt', 'xml', 'json', 'ott', 'docm', 'html', 'fodt', 'uot', 'rtf', 'odt'] },
+        { name: 'Todos los archivos', extensions: ['*'] }
+      ];
+    case 'spreadsheet':
+      return [
+        { name: 'Hojas de cálculo', extensions: ['xls', 'ods', 'ots', 'fods', 'uds', 'xlsx', 'dif', 'dbf', 'slk', 'csv', 'xlsm'] },
+        { name: 'Todos los archivos', extensions: ['*'] }
+      ];
+    case 'presentation':
+      return [
+        { name: 'Presentaciones', extensions: ['ps', 'ppsx', 'odp', 'odg', 'fodp', 'uop', 'potx', 'ppt', 'ppsx', 'pptx', 'potx', 'pptm'] },
+        { name: 'Todos los archivos', extensions: ['*'] }
       ];
     case 'compress':
       return [
-        { name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'webp'] }
+        { name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'webp'] },
+        { name: 'Todos los archivos', extensions: ['*'] }
       ];
     default:
       return [{ name: 'Todos los archivos', extensions: ['*'] }];
@@ -309,7 +350,11 @@ function getFileExtensions() {
     case 'image':
       return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'];
     case 'document':
-      return ['docx', 'doc', 'odt', 'txt', 'rtf'];
+      return ['docx', 'doc', 'odf', 'txt', 'xml', 'json', 'ott', 'docm', 'html', 'fodt', 'uot', 'rtf', 'odt'];
+    case 'spreadsheet':
+      return ['xls', 'ods', 'ots', 'fods', 'uds', 'xlsx', 'dif', 'dbf', 'slk', 'csv', 'xlsm'];
+    case 'presentation':
+      return ['ps', 'ppsx', 'odp', 'odg', 'fodp', 'uop', 'potx', 'ppt', 'ppsx', 'pptx', 'potx', 'pptm'];
     case 'compress':
       return ['jpg', 'jpeg', 'png', 'webp'];
     default:
@@ -322,12 +367,16 @@ function getFileType(filename) {
   const videoExts = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'];
   const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'];
   const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'];
-  const documentExts = ['docx', 'doc', 'odt', 'txt', 'rtf'];
+  const documentExts = ['docx', 'doc', 'odf', 'txt', 'xml', 'json', 'ott', 'docm', 'html', 'fodt', 'uot', 'rtf', 'odt', 'pdf'];
+  const spreadsheetExts = ['xls', 'ods', 'ots', 'fods', 'uds', 'xlsx', 'dif', 'dbf', 'slk', 'csv', 'xlsm', 'pdf'];
+  const presentationExts = ['ps', 'ppsx', 'odp', 'odg', 'fodp', 'uop', 'potx', 'ppt', 'ppsx', 'pptx', 'potx', 'pptm', 'pdf'];
 
   if (videoExts.includes(ext)) return 'video';
   if (audioExts.includes(ext)) return 'audio';
   if (imageExts.includes(ext)) return 'image';
   if (documentExts.includes(ext)) return 'document';
+  if (spreadsheetExts.includes(ext)) return 'spreadsheet';
+  if (presentationExts.includes(ext)) return 'presentation';
   return 'unknown';
 }
 
@@ -343,6 +392,10 @@ function getFileTypeLabel(conversionType) {
       return 'imagen';
     case 'document':
       return 'documento';
+    case 'spreadsheet':
+      return 'hoja de cálculo';
+    case 'presentation':
+      return 'presentación';
     case 'compress':
       return 'imagen';
     default:
@@ -399,6 +452,12 @@ function updateSettingsPanel() {
         break;
       case 'document':
         shouldShow = fileType === 'document';
+        break;
+      case 'spreadsheet':
+        shouldShow = fileType === 'spreadsheet';
+        break;
+      case 'presentation':
+        shouldShow = fileType === 'presentation';
         break;
       case 'compress':
         shouldShow = fileType === 'image';
@@ -471,6 +530,12 @@ function updateSettingsPanel() {
       break;
     case 'document':
       settingsHTML += getDocumentSettings();
+      break;
+    case 'spreadsheet':
+      settingsHTML += getSpreadsheetSettings();
+      break;
+    case 'presentation':
+      settingsHTML += getPresentationSettings();
       break;
     case 'compress':
       settingsHTML += getCompressSettings();
@@ -598,9 +663,50 @@ function getDocumentSettings() {
       <label class="setting-label">Formato de salida</label>
       <select class="setting-select" id="output-format">
         <option value="pdf">PDF</option>
+        <option value="docx">DOCX</option>
+        <option value="doc">DOC</option>
+        <option value="odt">ODT</option>
+        <option value="txt">TXT</option>
+        <option value="rtf">RTF</option>
+        <option value="html">HTML</option>
       </select>
     </div>
-    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+    <p class="setting-note">
+      Requiere LibreOffice instalado en el sistema
+    </p>
+  `;
+}
+
+function getSpreadsheetSettings() {
+  return `
+    <div class="setting-group">
+      <label class="setting-label">Formato de salida</label>
+      <select class="setting-select" id="output-format">
+        <option value="xlsx">XLSX</option>
+        <option value="xls">XLS</option>
+        <option value="ods">ODS</option>
+        <option value="csv">CSV</option>
+        <option value="pdf">PDF</option>
+      </select>
+    </div>
+    <p class="setting-note">
+      Requiere LibreOffice instalado en el sistema
+    </p>
+  `;
+}
+
+function getPresentationSettings() {
+  return `
+    <div class="setting-group">
+      <label class="setting-label">Formato de salida</label>
+      <select class="setting-select" id="output-format">
+        <option value="pptx">PPTX</option>
+        <option value="ppt">PPT</option>
+        <option value="odp">ODP</option>
+        <option value="pdf">PDF</option>
+      </select>
+    </div>
+    <p class="setting-note">
       Requiere LibreOffice instalado en el sistema
     </p>
   `;
@@ -895,6 +1001,25 @@ infoModal.addEventListener('click', (e) => {
   }
 });
 
+// ── About Modal ───────────────────────────────────────────────────────────────
+const aboutModal = document.getElementById('about-modal');
+const closeAbout = document.getElementById('close-about');
+const btnInfo = document.getElementById('btn-info');
+
+btnInfo.addEventListener('click', () => {
+  aboutModal.classList.add('active');
+});
+
+closeAbout.addEventListener('click', () => {
+  aboutModal.classList.remove('active');
+});
+
+aboutModal.addEventListener('click', (e) => {
+  if (e.target.id === 'about-modal') {
+    aboutModal.classList.remove('active');
+  }
+});
+
 function openMiniPlayer(filePath, fileName) {
   const fileType = getFileType(fileName);
   playerTitle.textContent = fileName;
@@ -1046,14 +1171,37 @@ document.getElementById('btn-convert').addEventListener('click', async () => {
   }
 
   // Build conversion queue
-  conversionQueue = currentFiles.map((file, index) => ({
-    file,
-    index,
-    outputFormat,
-    quality,
-    resolution,
-    conversionType: currentConversionType
-  }));
+  conversionQueue = currentFiles.map((file, index) => {
+    const fileExt = file.name.split('.').pop().toLowerCase();
+
+    // Skip conversion if input and output formats are the same
+    if (fileExt === outputFormat) {
+      showToast(`Saltando ${file.name}: mismo formato (${fileExt})`, 'warning');
+      return null;
+    }
+
+
+    return {
+      file,
+      index,
+      outputFormat,
+      quality,
+      resolution,
+      conversionType: currentConversionType
+    };
+  }).filter(task => task !== null); // Remove null entries (skipped files)
+
+  // Check if all files were skipped
+  if (conversionQueue.length === 0) {
+    showToast('No hay archivos para convertir (todos tienen el mismo formato)', 'warning');
+    isConverting = false;
+    updateControlButtons(false);
+    btn.disabled = false;
+    modalBtn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Convertir`;
+    modalBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Convertir`;
+    return;
+  }
 
   try {
     await processConversionQueue(concurrentConversions);
@@ -1109,14 +1257,37 @@ document.getElementById('modal-btn-convert').addEventListener('click', async () 
   }
 
   // Build conversion queue
-  conversionQueue = currentFiles.map((file, index) => ({
-    file,
-    index,
-    outputFormat,
-    quality,
-    resolution,
-    conversionType: currentConversionType
-  }));
+  conversionQueue = currentFiles.map((file, index) => {
+    const fileExt = file.name.split('.').pop().toLowerCase();
+
+    // Skip conversion if input and output formats are the same
+    if (fileExt === outputFormat) {
+      showToast(`Saltando ${file.name}: mismo formato (${fileExt})`, 'warning');
+      return null;
+    }
+
+
+    return {
+      file,
+      index,
+      outputFormat,
+      quality,
+      resolution,
+      conversionType: currentConversionType
+    };
+  }).filter(task => task !== null); // Remove null entries (skipped files)
+
+  // Check if all files were skipped
+  if (conversionQueue.length === 0) {
+    showToast('No hay archivos para convertir (todos tienen el mismo formato)', 'warning');
+    isConverting = false;
+    updateControlButtons(false);
+    btn.disabled = false;
+    modalBtn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Convertir`;
+    modalBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Convertir`;
+    return;
+  }
 
   try {
     await processConversionQueue(concurrentConversions);
@@ -1191,50 +1362,48 @@ function updateControlButtons(converting, paused = false) {
 }
 
 async function processConversionQueue(concurrentConversions) {
-  console.log(`[ANTI-CRASH] Starting conversion queue with ${concurrentConversions} concurrent conversions`);
+  console.log(`[QUEUE] Iniciando cola: ${conversionQueue.length} archivo(s), ${concurrentConversions} simultáneo(s)`);
 
   while (conversionQueue.length > 0 && isConverting) {
     const batch = conversionQueue.splice(0, concurrentConversions);
-    console.log(`[ANTI-CRASH] Processing batch of ${batch.length} files`);
+    console.log(`[QUEUE] Procesando lote de ${batch.length} archivo(s), restantes en cola: ${conversionQueue.length}`);
 
     const promises = batch.map(task => {
       const file = currentFiles[task.index];
       file.status = 'Convirtiendo...';
       updateFileProgress(task.index, 0);
+      console.log(`[QUEUE] Iniciando: ${file.name} → ${task.outputFormat} (tipo: ${task.conversionType})`);
 
-      // Anti-crash: Wrap each conversion in timeout protection
       return Promise.race([
         performConversion(task.file, task.outputFormat, task.quality, task.index, task.conversionType, task.resolution, ffmpegSettings),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout: Conversión excedió tiempo límite')), 60000) // 60 seconds per file
+          setTimeout(() => reject(new Error('Timeout: Conversión excedió tiempo límite (120s)')), 120000)
         )
       ])
         .then(() => {
           file.status = 'Completado';
           file.progress = 100;
           updateFileProgress(task.index, 100);
-          console.log(`[ANTI-CRASH] File completed: ${file.name}`);
+          console.log(`[QUEUE] ✓ Completado: ${file.name}`);
         })
         .catch(err => {
-          console.error(`[ANTI-CRASH] Conversion failed for file: ${file.name}`, err);
           file.status = 'Error: ' + (err.message || 'Error desconocido');
           updateFileProgress(task.index, file.progress);
-          addLog(`Error convirtiendo ${file.name}: ${err.message}`, 'error');
+          console.error(`[QUEUE] ✗ Error en ${file.name}: ${err.message}`);
         });
     });
 
     activePromises = promises;
-    await Promise.allSettled(promises); // Use allSettled to continue even if some fail
+    await Promise.allSettled(promises);
 
-    console.log(`[ANTI-CRASH] Batch completed, remaining files: ${conversionQueue.length}`);
+    console.log(`[QUEUE] Lote completado. Archivos en cola: ${conversionQueue.length}`);
 
-    // Anti-crash: Small delay between batches to prevent memory buildup
     if (conversionQueue.length > 0) {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 
-  console.log('[ANTI-CRASH] Conversion queue completed');
+  console.log('[QUEUE] Cola de conversión finalizada');
 }
 
 function updateFileProgress(index, progress) {
@@ -1254,26 +1423,31 @@ function updateFileProgress(index, progress) {
 }
 
 async function performConversion(file, outputFormat, quality, fileIndex, conversionType, resolution, ffmpegSettings) {
-  console.log(`[CONVERSION] Iniciando conversión: ${file.name} -> ${outputFormat}`);
-  console.log(`[CONVERSION] Tipo: ${conversionType}, Calidad: ${quality}, Resolución: ${resolution}`);
+  const startTime = Date.now();
+  console.log(`[CONVERSION] ▶ Iniciando: ${file.name} → ${outputFormat}`);
+  console.log(`[CONVERSION] Tipo: ${conversionType} | Calidad: ${quality ?? 'default'} | Resolución: ${resolution} | Carpeta salida: ${outputFolder ?? 'misma carpeta'}`);
+  console.log(`[CONVERSION] Ruta: ${file.path}`);
 
-  // Listen for progress updates
   const progressListener = (event, data) => {
     if (data && data.index === fileIndex) {
       file.progress = data.progress;
       updateFileProgress(fileIndex, data.progress);
+      if (data.progress % 20 === 0) {
+        console.log(`[CONVERSION] Progreso ${file.name}: ${data.progress}%`);
+      }
     }
   };
 
   window.api.onConversionProgress(progressListener);
 
   try {
-    // Call main process to perform conversion
     const result = await window.api.performConversion(file, outputFormat, quality, outputFolder, fileIndex, conversionType, resolution, ffmpegSettings);
-    console.log(`[CONVERSION] Conversión completada: ${file.name}`);
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`[CONVERSION] ✓ Completado: ${file.name} en ${elapsed}s`);
     return result;
   } catch (error) {
-    console.error(`[CONVERSION ERROR] ${file.name}:`, error.message);
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.error(`[CONVERSION] ✗ Error en ${file.name} (${elapsed}s): ${error.message}`);
     throw error;
   } finally {
     window.api.removeConversionProgressListener(progressListener);

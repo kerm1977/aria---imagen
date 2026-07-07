@@ -14,6 +14,7 @@ function createWindow() {
     frame: false,
     titleBarStyle: 'hidden',
     backgroundColor: '#1a1a2e',
+    icon: path.join(__dirname, 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -207,6 +208,14 @@ ipcMain.handle('get-file-info', async (event, filePath) => {
 
 // Perform conversion handler
 ipcMain.handle('perform-conversion', async (event, file, outputFormat, quality, outputFolder, fileIndex, conversionType, resolution, ffmpegSettings) => {
+  console.log('[IPC-CONVERT] Received conversion request:');
+  console.log('[IPC-CONVERT] File:', file.path);
+  console.log('[IPC-CONVERT] Output format:', outputFormat);
+  console.log('[IPC-CONVERT] Conversion type:', conversionType);
+  console.log('[IPC-CONVERT] Quality:', quality);
+  console.log('[IPC-CONVERT] Output folder:', outputFolder);
+  console.log('[IPC-CONVERT] File index:', fileIndex);
+
   // Determine output path
   let outputPath;
   const baseName = path.basename(file.path, path.extname(file.path));
@@ -221,13 +230,12 @@ ipcMain.handle('perform-conversion', async (event, file, outputFormat, quality, 
     outputPath = path.join(inputDir, sanitizedName + '.' + outputFormat);
   }
 
-  console.log('Converting', file.path, 'to', outputFormat);
-  console.log('Output path:', outputPath);
+  console.log('[IPC-CONVERT] Output path:', outputPath);
 
   // Check if output directory exists
   const outputDir = path.dirname(outputPath);
   if (!fs.existsSync(outputDir)) {
-    console.error('Output directory does not exist:', outputDir);
+    console.error('[IPC-CONVERT] Output directory does not exist:', outputDir);
     return { success: false, error: 'Directorio de salida no existe: ' + outputDir };
   }
 
@@ -241,6 +249,7 @@ ipcMain.handle('perform-conversion', async (event, file, outputFormat, quality, 
 
     // Normalize conversion type
     const normalizedType = String(conversionType).trim().toLowerCase();
+    console.log('[IPC-CONVERT] Normalized type:', normalizedType);
 
     switch (normalizedType) {
       case 'video':
@@ -258,18 +267,25 @@ ipcMain.handle('perform-conversion', async (event, file, outputFormat, quality, 
       case 'document':
         result = await convertDocument(file.path, outputPath, outputFormat, quality, event, fileIndex);
         break;
+      case 'spreadsheet':
+        result = await convertSpreadsheet(file.path, outputPath, outputFormat, quality, event, fileIndex);
+        break;
+      case 'presentation':
+        result = await convertPresentation(file.path, outputPath, outputFormat, quality, event, fileIndex);
+        break;
       case 'compress':
         result = await compressImage(file.path, outputPath, outputFormat, quality, event, fileIndex);
         break;
       default:
-        console.error('Unknown conversion type:', normalizedType);
+        console.error('[IPC-CONVERT] Unknown conversion type:', normalizedType);
         throw new Error('Tipo de conversión no soportado: ' + normalizedType);
     }
 
+    console.log('[IPC-CONVERT] Conversion completed successfully');
     return { success: true, outputPath };
   } catch (error) {
-    console.error('Conversion error:', error);
-    return { success: false, error: error.message };
+    console.error('[IPC-CONVERT] Conversion error:', error.message);
+    throw error; // Propagate error to renderer so it shows as failure
   }
 });
 
@@ -560,44 +576,231 @@ function convertImage(inputPath, outputPath, outputFormat, quality, event, fileI
   });
 }
 
-// Document conversion to PDF with LibreOffice
+// Document conversion using pdf2docx for PDF→DOCX/DOC, soffice CLI for others
 function convertDocument(inputPath, outputPath, outputFormat, quality, event, fileIndex) {
   return new Promise((resolve, reject) => {
-    const libre = require('libreoffice-convert');
+    const { execFile } = require('child_process');
+    const inputExt = path.extname(inputPath).toLowerCase().slice(1);
 
-    event.sender.send('conversion-progress', {
-      index: fileIndex,
-      progress: 50
-    });
+    console.log(`[DOC-CONVERT] Input: ${inputPath}`);
+    console.log(`[DOC-CONVERT] Output: ${outputPath}`);
+    console.log(`[DOC-CONVERT] Format: ${outputFormat}`);
+    console.log(`[DOC-CONVERT] Input extension: ${inputExt}`);
 
-    const ext = path.extname(inputPath);
-    fs.readFile(inputPath, (err, data) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+    event.sender.send('conversion-progress', { index: fileIndex, progress: 20 });
 
-      libre.convert(data, '.pdf', async (err, done) => {
-        if (err) {
-          reject(err);
+    // Use pdf2docx for PDF→DOCX/DOC conversions
+    if (inputExt === 'pdf' && (outputFormat === 'docx' || outputFormat === 'doc')) {
+      console.log(`[DOC-CONVERT] Using pdf2docx for PDF→${outputFormat}`);
+      const pythonScript = `
+import sys
+from pdf2docx import Converter
+
+try:
+    pdf_file = sys.argv[1]
+    docx_file = sys.argv[2]
+    cv = Converter(pdf_file)
+    cv.convert(docx_file)
+    cv.close()
+    print("SUCCESS")
+except Exception as e:
+    print(f"ERROR: {e}", file=sys.stderr)
+    sys.exit(1)
+`;
+      const finalArgs = ['-c', pythonScript, inputPath, outputPath];
+      console.log(`[DOC-CONVERT] Running: python3 ${finalArgs.slice(2).join(' ')}`);
+      event.sender.send('conversion-progress', { index: fileIndex, progress: 40 });
+
+      execFile('python3', finalArgs, { timeout: 120000 }, (error, stdout, stderr) => {
+        if (stdout) console.log(`[DOC-CONVERT] stdout: ${stdout}`);
+        if (stderr) console.log(`[DOC-CONVERT] stderr: ${stderr}`);
+
+        if (error) {
+          console.error(`[DOC-CONVERT] pdf2docx error: ${error.message}`);
+          reject(new Error(`pdf2docx error: ${error.message}`));
           return;
         }
 
-        fs.writeFile(outputPath, done, (err) => {
-          if (err) {
-            reject(err);
-            return;
-          }
+        if (!stdout.includes('SUCCESS')) {
+          console.error(`[DOC-CONVERT] pdf2docx did not report success`);
+          reject(new Error('pdf2docx no reportó éxito'));
+          return;
+        }
 
-          event.sender.send('conversion-progress', {
-            index: fileIndex,
-            progress: 100
-          });
-          console.log('Document conversion completed');
-          resolve();
-        });
+        event.sender.send('conversion-progress', { index: fileIndex, progress: 100 });
+        console.log(`[DOC-CONVERT] Conversion completed: ${outputPath}`);
+        resolve();
       });
+    } else {
+      // Use soffice CLI for other conversions
+      console.log(`[DOC-CONVERT] Using soffice CLI for ${inputExt}→${outputFormat}`);
+      convertDocumentSoffice(inputPath, outputPath, outputFormat, quality, event, fileIndex)
+        .then(resolve)
+        .catch(reject);
+    }
+  });
+}
+
+// Fallback: LibreOffice CLI (for non-PDF conversions)
+function convertDocumentSoffice(inputPath, outputPath, outputFormat, quality, event, fileIndex) {
+  return new Promise((resolve, reject) => {
+    const { execFile } = require('child_process');
+    const os = require('os');
+
+    console.log(`[DOC-CONVERT-SOFFICE] Input: ${inputPath}`);
+    console.log(`[DOC-CONVERT-SOFFICE] Output: ${outputPath}`);
+
+    event.sender.send('conversion-progress', { index: fileIndex, progress: 20 });
+
+    const tempDir = os.tmpdir();
+    const inputBasename = path.basename(inputPath, path.extname(inputPath));
+    const tempOutputPath = path.join(tempDir, `${inputBasename}.${outputFormat}`);
+
+    const outputFilterMap = {
+      'pdf': 'writer_pdf_Export',
+      'docx': 'MS Word 2007 XML',
+      'doc': 'MS Word 97',
+      'odt': 'writer8',
+      'txt': 'Text',
+      'rtf': 'Rich Text Format',
+      'html': 'HTML (StarWriter)'
+    };
+    const outputFilter = outputFilterMap[outputFormat] || 'writer_pdf_Export';
+    const convertTo = `${outputFormat}:"${outputFilter}"`;
+    const finalArgs = ['--headless', '--convert-to', convertTo, '--outdir', tempDir, inputPath];
+
+    console.log(`[DOC-CONVERT-SOFFICE] Running: soffice ${finalArgs.join(' ')}`);
+    event.sender.send('conversion-progress', { index: fileIndex, progress: 40 });
+
+    execFile('soffice', finalArgs, { timeout: 120000 }, (error, stdout, stderr) => {
+      if (stdout) console.log(`[DOC-CONVERT-SOFFICE] stdout: ${stdout}`);
+      if (stderr) console.log(`[DOC-CONVERT-SOFFICE] stderr: ${stderr}`);
+      if (error) {
+        console.error(`[DOC-CONVERT-SOFFICE] CLI error: ${error.message}`);
+        reject(new Error(`LibreOffice CLI error: ${error.message}`));
+        return;
+      }
+      event.sender.send('conversion-progress', { index: fileIndex, progress: 80 });
+      const src = fs.existsSync(tempOutputPath) ? tempOutputPath : null;
+      if (!src) {
+        const files = fs.readdirSync(tempDir).filter(f => f.startsWith(inputBasename) && f.endsWith(`.${outputFormat}`));
+        if (files.length === 0) { reject(new Error(`Archivo de salida no encontrado`)); return; }
+        try { fs.renameSync(path.join(tempDir, files[0]), outputPath); } catch(e) { fs.copyFileSync(path.join(tempDir, files[0]), outputPath); }
+      } else {
+        try { fs.renameSync(src, outputPath); } catch(e) { fs.copyFileSync(src, outputPath); fs.unlinkSync(src); }
+      }
+      event.sender.send('conversion-progress', { index: fileIndex, progress: 100 });
+      console.log(`[DOC-CONVERT-SOFFICE] Conversion completed: ${outputPath}`);
+      resolve();
     });
+  });
+}
+
+// Spreadsheet conversion using LibreOffice CLI
+function convertSpreadsheet(inputPath, outputPath, outputFormat, quality, event, fileIndex) {
+  return new Promise((resolve, reject) => {
+    const { execFile } = require('child_process');
+    const os = require('os');
+
+    console.log(`[CALC-CONVERT] Input: ${inputPath}`);
+    console.log(`[CALC-CONVERT] Output: ${outputPath}`);
+    console.log(`[CALC-CONVERT] Format: ${outputFormat}`);
+
+    event.sender.send('conversion-progress', { index: fileIndex, progress: 20 });
+
+    const tempDir = os.tmpdir();
+    const inputBasename = path.basename(inputPath, path.extname(inputPath));
+    const tempOutputPath = path.join(tempDir, `${inputBasename}.${outputFormat}`);
+
+    const filterMap = {
+      'xlsx': 'MS Excel 2007 XML',
+      'xls': 'MS Excel 97',
+      'ods': 'calc8',
+      'csv': 'Text - txt - csv (StarCalc)',
+      'pdf': 'calc_pdf_Export'
+    };
+    const filter = filterMap[outputFormat] || 'calc8';
+    const convertTo = `${outputFormat}:"${filter}"`;
+
+    const finalArgs = ['--headless', '--convert-to', convertTo, '--outdir', tempDir, inputPath];
+    console.log(`[CALC-CONVERT] Running: soffice ${finalArgs.join(' ')}`);
+    event.sender.send('conversion-progress', { index: fileIndex, progress: 40 });
+
+    execFile('soffice', finalArgs, { timeout: 120000 }, (error, stdout, stderr) => {
+      if (stdout) console.log(`[CALC-CONVERT] stdout: ${stdout}`);
+      if (stderr) console.log(`[CALC-CONVERT] stderr: ${stderr}`);
+      if (error) {
+        console.error(`[CALC-CONVERT] CLI error: ${error.message}`);
+        reject(new Error(`LibreOffice CLI error: ${error.message}`));
+        return;
+      }
+      event.sender.send('conversion-progress', { index: fileIndex, progress: 80 });
+      const src = fs.existsSync(tempOutputPath) ? tempOutputPath : null;
+      if (!src) {
+        const files = fs.readdirSync(tempDir).filter(f => f.startsWith(inputBasename) && f.endsWith(`.${outputFormat}`));
+        if (files.length === 0) { reject(new Error(`Archivo de salida no encontrado`)); return; }
+        try { fs.renameSync(path.join(tempDir, files[0]), outputPath); } catch(e) { fs.copyFileSync(path.join(tempDir, files[0]), outputPath); }
+      } else {
+        try { fs.renameSync(src, outputPath); } catch(e) { fs.copyFileSync(src, outputPath); fs.unlinkSync(src); }
+      }
+      event.sender.send('conversion-progress', { index: fileIndex, progress: 100 });
+      console.log(`[CALC-CONVERT] Conversion completed: ${outputPath}`);
+      resolve();
+    });
+  });
+}
+
+// Presentation conversion using LibreOffice CLI
+function convertPresentation(inputPath, outputPath, outputFormat, quality, event, fileIndex) {
+  return new Promise((resolve, reject) => {
+    const { execFile } = require('child_process');
+    const os = require('os');
+
+    console.log(`[PRES-CONVERT] Input: ${inputPath}`);
+    console.log(`[PRES-CONVERT] Output: ${outputPath}`);
+    console.log(`[PRES-CONVERT] Format: ${outputFormat}`);
+
+    event.sender.send('conversion-progress', { index: fileIndex, progress: 20 });
+
+    const tempDir = os.tmpdir();
+    const inputBasename = path.basename(inputPath, path.extname(inputPath));
+    const tempOutputPath = path.join(tempDir, `${inputBasename}.${outputFormat}`);
+
+    const filterMap = {
+      'pptx': 'MS PowerPoint 2007 XML',
+      'ppt': 'MS PowerPoint 97',
+      'odp': 'impress8',
+      'pdf': 'impress_pdf_Export'
+    };
+    const filter = filterMap[outputFormat] || 'impress8';
+    const convertTo = `${outputFormat}:"${filter}"`;
+
+    const finalArgs = ['--headless', '--convert-to', convertTo, '--outdir', tempDir, inputPath];
+    console.log(`[PRES-CONVERT] Running: soffice ${finalArgs.join(' ')}`);
+    event.sender.send('conversion-progress', { index: fileIndex, progress: 40 });
+
+    execFile('soffice', finalArgs, { timeout: 120000 }, (error, stdout, stderr) => {
+      if (stdout) console.log(`[PRES-CONVERT] stdout: ${stdout}`);
+      if (stderr) console.log(`[PRES-CONVERT] stderr: ${stderr}`);
+      if (error) {
+        console.error(`[PRES-CONVERT] CLI error: ${error.message}`);
+        reject(new Error(`LibreOffice CLI error: ${error.message}`));
+        return;
+      }
+      event.sender.send('conversion-progress', { index: fileIndex, progress: 80 });
+      const src = fs.existsSync(tempOutputPath) ? tempOutputPath : null;
+      if (!src) {
+        const files = fs.readdirSync(tempDir).filter(f => f.startsWith(inputBasename) && f.endsWith(`.${outputFormat}`));
+        if (files.length === 0) { reject(new Error(`Archivo de salida no encontrado`)); return; }
+        try { fs.renameSync(path.join(tempDir, files[0]), outputPath); } catch(e) { fs.copyFileSync(path.join(tempDir, files[0]), outputPath); }
+      } else {
+        try { fs.renameSync(src, outputPath); } catch(e) { fs.copyFileSync(src, outputPath); fs.unlinkSync(src); }
+      }
+      event.sender.send('conversion-progress', { index: fileIndex, progress: 100 });
+      console.log(`[PRES-CONVERT] Conversion completed: ${outputPath}`);
+      resolve();
+    });
+
   });
 }
 
