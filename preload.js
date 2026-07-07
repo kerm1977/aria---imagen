@@ -15,5 +15,6 @@ contextBridge.exposeInMainWorld('api', {
   pauseConversions: () => ipcRenderer.invoke('pause-conversions'),
   resumeConversions: () => ipcRenderer.invoke('resume-conversions'),
   stopConversions: () => ipcRenderer.invoke('stop-conversions'),
-  openDevTools: () => ipcRenderer.invoke('open-dev-tools')
+  openDevTools: () => ipcRenderer.invoke('open-dev-tools'),
+  getFileInfo: (filePath) => ipcRenderer.invoke('get-file-info', filePath)
 });

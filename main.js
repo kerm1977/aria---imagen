@@ -142,6 +142,69 @@ ipcMain.handle('open-dev-tools', async () => {
   return { success: true };
 });
 
+// Get file info handler
+ipcMain.handle('get-file-info', async (event, filePath) => {
+  try {
+    const stats = fs.statSync(filePath);
+    const fileSize = stats.size;
+    const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+    const extension = path.extname(filePath).toLowerCase();
+    const fileName = path.basename(filePath);
+    const directory = path.dirname(filePath);
+
+    // Get metadata using FFmpeg for media files
+    let metadata = {};
+    const mediaExtensions = ['.mp4', '.avi', '.mkv', '.mov', '.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.tiff'];
+
+    if (mediaExtensions.includes(extension)) {
+      try {
+        await new Promise((resolve, reject) => {
+          ffmpeg(filePath).ffprobe((err, data) => {
+            if (err) {
+              reject(err);
+            } else {
+              if (data.streams && data.streams.length > 0) {
+                const stream = data.streams[0];
+                if (stream.codec_name) metadata.codec = stream.codec_name;
+                if (stream.width) metadata.width = stream.width;
+                if (stream.height) metadata.height = stream.height;
+                if (stream.duration) metadata.duration = Math.round(stream.duration);
+                if (stream.bit_rate) metadata.bitrate = Math.round(stream.bit_rate / 1000);
+              }
+              if (data.format) {
+                if (data.format.duration) metadata.duration = Math.round(data.format.duration);
+                if (data.format.bit_rate) metadata.bitrate = Math.round(data.format.bit_rate / 1000);
+              }
+              resolve();
+            }
+          });
+        });
+      } catch (probeError) {
+        console.log('FFprobe error:', probeError);
+        // Continue without metadata
+      }
+    }
+
+    return {
+      success: true,
+      info: {
+        name: fileName,
+        path: filePath,
+        directory: directory,
+        size: fileSizeMB + ' MB',
+        sizeBytes: fileSize,
+        extension: extension,
+        ...metadata
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
 // Perform conversion handler
 ipcMain.handle('perform-conversion', async (event, file, outputFormat, quality, outputFolder, fileIndex, conversionType, resolution, ffmpegSettings) => {
   // Determine output path

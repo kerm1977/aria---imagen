@@ -485,12 +485,51 @@ body {
     margin-bottom: 0;
 }
 
+.file-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
 .file-item-name {
     font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
-    margin-bottom: 4px;
     word-break: break-all;
+    flex: 1;
+    margin-right: 8px;
+}
+
+.file-item-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.file-item-pause,
+.file-item-remove {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-item-pause:hover {
+    background: var(--warning);
+    color: white;
+}
+
+.file-item-remove:hover {
+    background: var(--error);
+    color: white;
 }
 
 .file-item-status {
@@ -767,6 +806,10 @@ body {
     border-radius: 4px;
 }
 
+.hidden-player {
+    display: none;
+}
+
 .image-preview {
     max-width: 100%;
     max-height: 500px;
@@ -792,6 +835,106 @@ body {
 .no-preview p {
     font-size: 13px;
     margin: 0;
+}
+
+/* ============================================================================
+ * CONTEXT MENU
+ * ============================================================================ */
+.context-menu {
+    position: fixed;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    min-width: 200px;
+    padding: 4px;
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.context-menu-item:hover {
+    background: var(--button-hover);
+}
+
+.context-menu-item svg {
+    flex-shrink: 0;
+}
+
+.context-menu-item span {
+    flex: 1;
+}
+
+.context-menu-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.context-menu-item.disabled:hover {
+    background: transparent;
+}
+
+.hidden-menu {
+    display: none !important;
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* ============================================================================
+ * CONFIRM MODAL
+ * ============================================================================ */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.modal-actions .btn {
+    min-width: 80px;
+}
+
+/* ============================================================================
+ * INFO MODAL
+ * ============================================================================ */
+#file-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.info-value {
+    color: var(--text-primary);
+    font-size: 13px;
+    word-break: break-all;
+    text-align: right;
 }
 
 /* ============================================================================

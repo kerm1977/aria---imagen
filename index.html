@@ -255,14 +255,76 @@
     </div>
     <div class="modal-body">
       <div class="player-container">
-        <video id="video-player" class="media-player" controls style="display: none;"></video>
-        <audio id="audio-player" class="media-player" controls style="display: none;"></audio>
-        <img id="image-preview" class="image-preview" style="display: none;">
+        <video id="video-player" class="media-player hidden-player" controls></video>
+        <audio id="audio-player" class="media-player hidden-player" controls></audio>
+        <img id="image-preview" class="image-preview hidden-player">
         <div id="no-preview" class="no-preview">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <p>No disponible para previsualización</p>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Context Menu -->
+<div id="context-menu" class="context-menu hidden-menu">
+  <div class="context-menu-item" data-action="delete">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    <span>Eliminar de la lista</span>
+  </div>
+  <div class="context-menu-item" data-action="open-location">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    <span>Abrir Ubicación</span>
+  </div>
+  <div class="context-menu-item" data-action="pause">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    <span>Pausar</span>
+  </div>
+  <div class="context-menu-item" data-action="resume">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <span>Reanudar</span>
+  </div>
+  <div class="context-menu-item" data-action="view">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <span>Ver</span>
+  </div>
+  <div class="context-menu-item" data-action="info">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <span>Info</span>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="confirm-title">Confirmar</h2>
+      <button class="modal-close" id="close-confirm">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message">¿Estás seguro?</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="confirm-no">No</button>
+        <button class="btn btn-primary" id="confirm-yes">Sí</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Modal -->
+<div id="info-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Información del Archivo</h2>
+      <button class="modal-close" id="close-info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="file-info-content"></div>
     </div>
   </div>
 </div>

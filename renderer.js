@@ -12,7 +12,6 @@ let ffmpegSettings = {
   hardwareAccel: false,
   fastDecode: false
 };
-let confirmCallback = null;
 let consolePanelVisible = false;
 
 // ── Console/Logs Panel ───────────────────────────────────────────────────────
@@ -410,9 +409,28 @@ function updateSettingsPanel() {
 
     if (shouldShow) {
       visibleFiles++;
+      const isPaused = file.status === 'Pausado';
+      const isConverting = file.status === 'Convirtiendo...';
+      const showPauseBtn = isConverting || isPaused;
+
       settingsHTML += `
         <div class="file-item" data-index="${index}">
-          <div class="file-item-name">${file.name}</div>
+          <div class="file-item-header">
+            <div class="file-item-name">${file.name}</div>
+            <div class="file-item-actions">
+              ${showPauseBtn ? `
+                <button class="file-item-pause" data-index="${index}" title="${isPaused ? 'Reanudar' : 'Pausar'}">
+                  ${isPaused ?
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>' :
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+                  }
+                </button>
+              ` : ''}
+              <button class="file-item-remove" data-index="${index}" title="Eliminar archivo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
           <div class="file-item-status">${file.status}</div>
           <div class="file-item-progress">
             <div class="progress-bar">
@@ -622,35 +640,290 @@ const imagePreview = document.getElementById('image-preview');
 const noPreview = document.getElementById('no-preview');
 const playerTitle = document.getElementById('player-title');
 
+// ── Context Menu ───────────────────────────────────────────────────────────────
+const contextMenu = document.getElementById('context-menu');
+let contextMenuFileIndex = null;
+
+// Close context menu on click elsewhere
+document.addEventListener('click', (e) => {
+  if (!contextMenu.contains(e.target)) {
+    contextMenu.classList.add('hidden-menu');
+  }
+});
+
+// Single right-click handler for file items
+document.addEventListener('contextmenu', (e) => {
+  const fileItem = e.target.closest('.file-item');
+
+  if (fileItem) {
+    // Right-click on file item - show context menu
+    e.preventDefault();
+    contextMenuFileIndex = parseInt(fileItem.dataset.index);
+    const file = currentFiles[contextMenuFileIndex];
+
+    if (file) {
+      // Position context menu and make it visible
+      contextMenu.classList.remove('hidden-menu');
+      contextMenu.style.left = e.pageX + 'px';
+      contextMenu.style.top = e.pageY + 'px';
+
+      // Enable/disable menu items based on file status
+      const isConverting = file.status === 'Convirtiendo...';
+      const isPaused = file.status === 'Pausado';
+      const isCompleted = file.status === 'Completado';
+      const isPending = file.status === 'Pendiente';
+
+      // Delete - always enabled unless converting
+      const deleteItem = contextMenu.querySelector('[data-action="delete"]');
+      deleteItem.classList.toggle('disabled', isConverting);
+
+      // Open location - always enabled
+      const openLocationItem = contextMenu.querySelector('[data-action="open-location"]');
+      openLocationItem.classList.remove('disabled');
+
+      // Pause - only enabled if converting
+      const pauseItem = contextMenu.querySelector('[data-action="pause"]');
+      pauseItem.classList.toggle('disabled', !isConverting);
+
+      // Resume - only enabled if paused
+      const resumeItem = contextMenu.querySelector('[data-action="resume"]');
+      resumeItem.classList.toggle('disabled', !isPaused);
+
+      // View - enabled for media files
+      const viewItem = contextMenu.querySelector('[data-action="view"]');
+      const fileType = getFileType(file.name);
+      viewItem.classList.toggle('disabled', fileType === 'document' || fileType === 'unknown');
+
+      // Info - always enabled
+      const infoItem = contextMenu.querySelector('[data-action="info"]');
+      infoItem.classList.remove('disabled');
+    }
+  } else {
+    // Right-click elsewhere - hide context menu
+    contextMenu.classList.add('hidden-menu');
+  }
+});
+
+// Context menu item click handler
+contextMenu.addEventListener('click', async (e) => {
+  const menuItem = e.target.closest('.context-menu-item');
+  if (menuItem && !menuItem.classList.contains('disabled')) {
+    const action = menuItem.dataset.action;
+    const file = currentFiles[contextMenuFileIndex];
+
+    if (file) {
+      switch (action) {
+        case 'delete':
+          showConfirmModal('¿Eliminar este archivo de la lista?', async () => {
+            // Remove file from array
+            currentFiles.splice(contextMenuFileIndex, 1);
+
+            // Update conversion queue
+            conversionQueue = conversionQueue.filter(task => task.index !== contextMenuFileIndex);
+            // Update indices in queue
+            conversionQueue.forEach((task, i) => {
+              if (task.index > contextMenuFileIndex) {
+                task.index--;
+              }
+            });
+
+            // Update UI
+            updateSettingsPanel();
+
+            // Disable convert button if no files left
+            if (currentFiles.length === 0) {
+              document.getElementById('btn-convert').disabled = true;
+              document.getElementById('modal-btn-convert').disabled = true;
+            }
+
+            showToast('Archivo eliminado de la lista', 'info');
+          });
+          break;
+
+        case 'open-location':
+          const folderPath = file.path.substring(0, file.path.lastIndexOf('/'));
+          await window.api.openFolder(folderPath);
+          break;
+
+        case 'pause':
+          if (file.status === 'Convirtiendo...') {
+            file.status = 'Pausado';
+            showToast('Archivo pausado', 'info');
+            updateSettingsPanel();
+          }
+          break;
+
+        case 'resume':
+          if (file.status === 'Pausado') {
+            file.status = 'Convirtiendo...';
+            showToast('Archivo reanudado', 'info');
+            updateSettingsPanel();
+          }
+          break;
+
+        case 'view':
+          openMiniPlayer(file.path, file.name);
+          break;
+
+        case 'info':
+          await showFileInfo(file);
+          break;
+      }
+    }
+
+    contextMenu.classList.add('hidden-menu');
+  }
+});
+
+// ── Confirm Modal ─────────────────────────────────────────────────────────────
+const confirmModal = document.getElementById('confirm-modal');
+const confirmTitle = document.getElementById('confirm-title');
+const confirmMessage = document.getElementById('confirm-message');
+const confirmYes = document.getElementById('confirm-yes');
+const confirmNo = document.getElementById('confirm-no');
+const closeConfirm = document.getElementById('close-confirm');
+let confirmCallback = null;
+
+function showConfirmModal(message, callback) {
+  confirmMessage.textContent = message;
+  confirmCallback = callback;
+  confirmModal.classList.add('active');
+}
+
+function hideConfirmModal() {
+  confirmModal.classList.remove('active');
+  confirmCallback = null;
+}
+
+confirmYes.addEventListener('click', () => {
+  if (confirmCallback) {
+    confirmCallback();
+  }
+  hideConfirmModal();
+});
+
+confirmNo.addEventListener('click', hideConfirmModal);
+closeConfirm.addEventListener('click', hideConfirmModal);
+
+confirmModal.addEventListener('click', (e) => {
+  if (e.target.id === 'confirm-modal') {
+    hideConfirmModal();
+  }
+});
+
+// ── Info Modal ───────────────────────────────────────────────────────────────
+const infoModal = document.getElementById('info-modal');
+const fileInfoContent = document.getElementById('file-info-content');
+const closeInfo = document.getElementById('close-info');
+
+async function showFileInfo(file) {
+  const result = await window.api.getFileInfo(file.path);
+
+  if (result.success) {
+    const info = result.info;
+    let infoHTML = `
+      <div class="info-row">
+        <span class="info-label">Nombre:</span>
+        <span class="info-value">${info.name}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Ubicación:</span>
+        <span class="info-value">${info.directory}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Tamaño:</span>
+        <span class="info-value">${info.size}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Extensión:</span>
+        <span class="info-value">${info.extension}</span>
+      </div>
+    `;
+
+    if (info.codec) {
+      infoHTML += `
+        <div class="info-row">
+          <span class="info-label">Codec:</span>
+          <span class="info-value">${info.codec}</span>
+        </div>
+      `;
+    }
+
+    if (info.width && info.height) {
+      infoHTML += `
+        <div class="info-row">
+          <span class="info-label">Resolución:</span>
+          <span class="info-value">${info.width}x${info.height}</span>
+        </div>
+      `;
+    }
+
+    if (info.duration) {
+      const minutes = Math.floor(info.duration / 60);
+      const seconds = info.duration % 60;
+      infoHTML += `
+        <div class="info-row">
+          <span class="info-label">Duración:</span>
+          <span class="info-value">${minutes}:${seconds.toString().padStart(2, '0')}</span>
+        </div>
+      `;
+    }
+
+    if (info.bitrate) {
+      infoHTML += `
+        <div class="info-row">
+          <span class="info-label">Bitrate:</span>
+          <span class="info-value">${info.bitrate} kbps</span>
+        </div>
+      `;
+    }
+
+    fileInfoContent.innerHTML = infoHTML;
+    infoModal.classList.add('active');
+  } else {
+    showToast('Error al obtener información del archivo', 'error');
+  }
+}
+
+closeInfo.addEventListener('click', () => {
+  infoModal.classList.remove('active');
+});
+
+infoModal.addEventListener('click', (e) => {
+  if (e.target.id === 'info-modal') {
+    infoModal.classList.remove('active');
+  }
+});
+
 function openMiniPlayer(filePath, fileName) {
   const fileType = getFileType(fileName);
   playerTitle.textContent = fileName;
 
   // Reset all players
-  videoPlayer.style.display = 'none';
+  videoPlayer.classList.add('hidden-player');
   videoPlayer.pause();
   videoPlayer.src = '';
 
-  audioPlayer.style.display = 'none';
+  audioPlayer.classList.add('hidden-player');
   audioPlayer.pause();
   audioPlayer.src = '';
 
-  imagePreview.style.display = 'none';
+  imagePreview.classList.add('hidden-player');
   imagePreview.src = '';
 
   noPreview.style.display = 'none';
 
   // Show appropriate player based on file type
   if (fileType === 'video') {
-    videoPlayer.style.display = 'block';
+    videoPlayer.classList.remove('hidden-player');
     videoPlayer.src = 'file://' + filePath;
     videoPlayer.play();
   } else if (fileType === 'audio') {
-    audioPlayer.style.display = 'block';
+    audioPlayer.classList.remove('hidden-player');
     audioPlayer.src = 'file://' + filePath;
     audioPlayer.play();
   } else if (fileType === 'image') {
-    imagePreview.style.display = 'block';
+    imagePreview.classList.remove('hidden-player');
     imagePreview.src = 'file://' + filePath;
   } else {
     noPreview.style.display = 'flex';
@@ -684,6 +957,64 @@ document.addEventListener('dblclick', (e) => {
     const file = currentFiles[index];
     if (file) {
       openMiniPlayer(file.path, file.name);
+    }
+  }
+});
+
+// Add remove button handler (delegated event)
+document.addEventListener('click', (e) => {
+  const removeBtn = e.target.closest('.file-item-remove');
+  if (removeBtn) {
+    const index = parseInt(removeBtn.dataset.index);
+    if (index >= 0 && index < currentFiles.length) {
+      // Check if file is currently being converted
+      if (currentFiles[index].status === 'Convirtiendo...' || currentFiles[index].status === 'Pausado') {
+        showToast('No se puede eliminar un archivo que se está convirtiendo', 'warning');
+        return;
+      }
+
+      // Remove file from array
+      currentFiles.splice(index, 1);
+
+      // Update conversion queue
+      conversionQueue = conversionQueue.filter(task => task.index !== index);
+      // Update indices in queue
+      conversionQueue.forEach((task, i) => {
+        if (task.index > index) {
+          task.index--;
+        }
+      });
+
+      // Update UI
+      updateSettingsPanel();
+
+      // Disable convert button if no files left
+      if (currentFiles.length === 0) {
+        document.getElementById('btn-convert').disabled = true;
+        document.getElementById('modal-btn-convert').disabled = true;
+      }
+
+      showToast('Archivo eliminado de la lista', 'info');
+    }
+  }
+
+  // Add pause/resume button handler (delegated event)
+  const pauseBtn = e.target.closest('.file-item-pause');
+  if (pauseBtn) {
+    const index = parseInt(pauseBtn.dataset.index);
+    if (index >= 0 && index < currentFiles.length) {
+      const file = currentFiles[index];
+      if (file.status === 'Convirtiendo...') {
+        // Pause the file
+        file.status = 'Pausado';
+        showToast('Archivo pausado', 'info');
+        updateSettingsPanel();
+      } else if (file.status === 'Pausado') {
+        // Resume the file
+        file.status = 'Convirtiendo...';
+        showToast('Archivo reanudado', 'info');
+        updateSettingsPanel();
+      }
     }
   }
 });
