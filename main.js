@@ -429,15 +429,12 @@ function extractAudio(inputPath, outputPath, outputFormat, quality, event, fileI
 function convertImage(inputPath, outputPath, outputFormat, quality, event, fileIndex) {
   return new Promise((resolve, reject) => {
     const ffmpeg = require('fluent-ffmpeg');
-    const qualityMap = {
-      'low': 2,
-      'medium': 5,
-      'high': 10
-    };
 
-    const q = qualityMap[quality] || 5;
+    // Quality is now a number from 1-100 (from slider)
+    // Convert to FFmpeg quality scale (1-31, where 1 is highest quality)
+    const q = Math.round(31 - (quality / 100 * 30)); // Convert 1-100 to 1-31
 
-    console.log(`[FFMPEG-IMAGE] Starting image conversion: ${inputPath} -> ${outputFormat}`);
+    console.log(`[FFMPEG-IMAGE] Starting image conversion: ${inputPath} -> ${outputFormat}, quality: ${quality} -> ${q}`);
 
     // FFmpeg codec mapping for images
     const codecMap = {
@@ -541,54 +538,74 @@ function convertDocument(inputPath, outputPath, outputFormat, quality, event, fi
   });
 }
 
-// Image compression with Sharp
+// Image compression with FFmpeg (more stable than Sharp)
 function compressImage(inputPath, outputPath, outputFormat, quality, event, fileIndex) {
   return new Promise((resolve, reject) => {
-    const sharp = require('sharp');
-    const qualityMap = {
-      'low': 40,
-      'medium': 70,
-      'high': 90
+    const ffmpeg = require('fluent-ffmpeg');
+
+    // Quality is now a number from 1-100 (from slider)
+    // Convert to FFmpeg quality scale (1-31, where 1 is highest quality)
+    const q = Math.round(31 - (quality / 100 * 30)); // Convert 1-100 to 1-31
+
+    console.log(`[FFMPEG-COMPRESS] Starting image compression: ${inputPath} -> ${outputFormat}, quality: ${quality} -> ${q}`);
+
+    // FFmpeg codec mapping for images
+    const codecMap = {
+      'jpg': 'mjpeg',
+      'jpeg': 'mjpeg',
+      'png': 'png',
+      'webp': 'libwebp',
+      'tiff': 'tiff',
+      'gif': 'gif',
+      'bmp': 'bmp'
     };
 
-    const q = qualityMap[quality] || 70;
+    const codec = codecMap[outputFormat] || 'mjpeg';
 
-    let sharpInstance = sharp(inputPath);
+    let command = ffmpeg(inputPath)
+      .output(outputPath)
+      .videoCodec(codec)
+      .outputOptions([
+        '-q:v', q.toString(), // Quality parameter
+        '-y' // Overwrite output
+      ]);
 
-    // Format-specific compression options
-    const formatOptions = { quality: q };
-
-    if (outputFormat === 'png') {
-      formatOptions.compressionLevel = 9;
-      formatOptions.adaptiveFiltering = true;
-    }
+    // Add format-specific options
     if (outputFormat === 'webp') {
-      formatOptions.effort = 6;
+      command = command.outputOptions(['-compression_level', '4']);
     }
-    if (outputFormat === 'jpeg' || outputFormat === 'jpg') {
-      formatOptions.mozjpeg = true;
-    }
-    if (outputFormat === 'avif') {
-      formatOptions.effort = 6;
-    }
-    if (outputFormat === 'heif') {
-      formatOptions.compression = 'hevc';
+    if (outputFormat === 'png') {
+      command = command.outputOptions(['-compression_level', '6']);
     }
 
-    sharpInstance
-      .toFormat(outputFormat, formatOptions)
-      .toFile(outputPath)
-      .then(() => {
-        console.log('Image compression completed');
+    command
+      .on('start', (commandLine) => {
+        console.log('FFmpeg command:', commandLine);
+        event.sender.send('conversion-progress', {
+          index: fileIndex,
+          progress: 25
+        });
+      })
+      .on('progress', (progress) => {
+        if (progress.percent) {
+          event.sender.send('conversion-progress', {
+            index: fileIndex,
+            progress: Math.min(75, Math.round(progress.percent))
+          });
+        }
+      })
+      .on('end', () => {
+        console.log('[FFMPEG-COMPRESS] Image compression completed');
         event.sender.send('conversion-progress', {
           index: fileIndex,
           progress: 100
         });
         resolve();
       })
-      .catch(err => {
-        console.error('Image compression error:', err);
-        reject(err);
-      });
+      .on('error', (err) => {
+        console.error('[FFMPEG-COMPRESS] Image compression error:', err);
+        reject(new Error(`Error de compresión: ${err.message}`));
+      })
+      .run();
   });
 }

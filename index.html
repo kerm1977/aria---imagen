@@ -244,6 +244,29 @@
   </div>
 </div>
 
+<!-- Mini Player Modal -->
+<div id="mini-player-modal" class="modal">
+  <div class="modal-content modal-player">
+    <div class="modal-header">
+      <h2 id="player-title">Previsualización</h2>
+      <button class="modal-close" id="close-player">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="player-container">
+        <video id="video-player" class="media-player" controls style="display: none;"></video>
+        <audio id="audio-player" class="media-player" controls style="display: none;"></audio>
+        <img id="image-preview" class="image-preview" style="display: none;">
+        <div id="no-preview" class="no-preview">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>No disponible para previsualización</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="renderer.js"></script>
 
 </body>

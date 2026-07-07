@@ -272,33 +272,27 @@ function getFileFilters() {
   switch (currentConversionType) {
     case 'video':
       return [
-        { name: 'Videos', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'] },
-        { name: 'Todos los archivos', extensions: ['*'] }
+        { name: 'Videos', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'] }
       ];
     case 'audio':
       return [
-        { name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'] },
-        { name: 'Todos los archivos', extensions: ['*'] }
+        { name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'] }
       ];
     case 'extract-audio':
       return [
-        { name: 'Videos', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'] },
-        { name: 'Todos los archivos', extensions: ['*'] }
+        { name: 'Videos', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'] }
       ];
     case 'image':
       return [
-        { name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'] },
-        { name: 'Todos los archivos', extensions: ['*'] }
+        { name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'] }
       ];
     case 'document':
       return [
-        { name: 'Documentos', extensions: ['docx', 'doc', 'odt', 'txt', 'rtf'] },
-        { name: 'Todos los archivos', extensions: ['*'] }
+        { name: 'Documentos', extensions: ['docx', 'doc', 'odt', 'txt', 'rtf'] }
       ];
     case 'compress':
       return [
-        { name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'webp'] },
-        { name: 'Todos los archivos', extensions: ['*'] }
+        { name: 'Imágenes', extensions: ['jpg', 'jpeg', 'png', 'webp'] }
       ];
     default:
       return [{ name: 'Todos los archivos', extensions: ['*'] }];
@@ -321,6 +315,39 @@ function getFileExtensions() {
       return ['jpg', 'jpeg', 'png', 'webp'];
     default:
       return [];
+  }
+}
+
+function getFileType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const videoExts = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'];
+  const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'];
+  const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'];
+  const documentExts = ['docx', 'doc', 'odt', 'txt', 'rtf'];
+
+  if (videoExts.includes(ext)) return 'video';
+  if (audioExts.includes(ext)) return 'audio';
+  if (imageExts.includes(ext)) return 'image';
+  if (documentExts.includes(ext)) return 'document';
+  return 'unknown';
+}
+
+function getFileTypeLabel(conversionType) {
+  switch (conversionType) {
+    case 'video':
+      return 'video';
+    case 'audio':
+      return 'audio';
+    case 'extract-audio':
+      return 'video';
+    case 'image':
+      return 'imagen';
+    case 'document':
+      return 'documento';
+    case 'compress':
+      return 'imagen';
+    default:
+      return 'este tipo';
   }
 }
 
@@ -350,22 +377,65 @@ function updateSettingsPanel() {
     </div>
   `;
 
-  // Add file list with progress bars
+  // Add file list with progress bars (filtered by conversion type)
   settingsHTML += '<div class="file-list">';
+  let visibleFiles = 0;
   currentFiles.forEach((file, index) => {
-    settingsHTML += `
-      <div class="file-item" data-index="${index}">
-        <div class="file-item-name">${file.name}</div>
-        <div class="file-item-status">${file.status}</div>
-        <div class="file-item-progress">
-          <div class="progress-bar">
-            <div class="progress-fill" data-progress="${file.progress}"></div>
+    const fileType = getFileType(file.name);
+
+    // Filter files based on current conversion type
+    let shouldShow = false;
+    switch (currentConversionType) {
+      case 'video':
+        shouldShow = fileType === 'video';
+        break;
+      case 'audio':
+        shouldShow = fileType === 'audio';
+        break;
+      case 'extract-audio':
+        shouldShow = fileType === 'video';
+        break;
+      case 'image':
+        shouldShow = fileType === 'image';
+        break;
+      case 'document':
+        shouldShow = fileType === 'document';
+        break;
+      case 'compress':
+        shouldShow = fileType === 'image';
+        break;
+      default:
+        shouldShow = true;
+    }
+
+    if (shouldShow) {
+      visibleFiles++;
+      settingsHTML += `
+        <div class="file-item" data-index="${index}">
+          <div class="file-item-name">${file.name}</div>
+          <div class="file-item-status">${file.status}</div>
+          <div class="file-item-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" data-progress="${file.progress}"></div>
+            </div>
+            <div class="progress-text">${file.progress}%</div>
           </div>
-          <div class="progress-text">${file.progress}%</div>
         </div>
+      `;
+    }
+  });
+
+  // Show message if no files of this type
+  if (visibleFiles === 0) {
+    settingsHTML += `
+      <div class="no-files-message">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p>No hay archivos de este tipo</p>
+        <p class="sub-text">Sube archivos de ${getFileTypeLabel(currentConversionType)} para continuar</p>
       </div>
     `;
-  });
+  }
+
   settingsHTML += '</div>';
 
   switch (currentConversionType) {
@@ -498,12 +568,8 @@ function getImageSettings() {
       </select>
     </div>
     <div class="setting-group">
-      <label class="setting-label">Calidad</label>
-      <select class="setting-select" id="quality">
-        <option value="high">Alta (95%)</option>
-        <option value="medium">Media (80%)</option>
-        <option value="low">Baja (60%)</option>
-      </select>
+      <label class="setting-label">Calidad: <span id="quality-value">80</span>%</label>
+      <input type="range" class="setting-range" id="quality" min="1" max="100" value="80">
     </div>
   `;
 }
@@ -548,6 +614,80 @@ document.addEventListener('input', (e) => {
   }
 });
 
+// ── Mini Player ───────────────────────────────────────────────────────────────
+const miniPlayerModal = document.getElementById('mini-player-modal');
+const videoPlayer = document.getElementById('video-player');
+const audioPlayer = document.getElementById('audio-player');
+const imagePreview = document.getElementById('image-preview');
+const noPreview = document.getElementById('no-preview');
+const playerTitle = document.getElementById('player-title');
+
+function openMiniPlayer(filePath, fileName) {
+  const fileType = getFileType(fileName);
+  playerTitle.textContent = fileName;
+
+  // Reset all players
+  videoPlayer.style.display = 'none';
+  videoPlayer.pause();
+  videoPlayer.src = '';
+
+  audioPlayer.style.display = 'none';
+  audioPlayer.pause();
+  audioPlayer.src = '';
+
+  imagePreview.style.display = 'none';
+  imagePreview.src = '';
+
+  noPreview.style.display = 'none';
+
+  // Show appropriate player based on file type
+  if (fileType === 'video') {
+    videoPlayer.style.display = 'block';
+    videoPlayer.src = 'file://' + filePath;
+    videoPlayer.play();
+  } else if (fileType === 'audio') {
+    audioPlayer.style.display = 'block';
+    audioPlayer.src = 'file://' + filePath;
+    audioPlayer.play();
+  } else if (fileType === 'image') {
+    imagePreview.style.display = 'block';
+    imagePreview.src = 'file://' + filePath;
+  } else {
+    noPreview.style.display = 'flex';
+  }
+
+  miniPlayerModal.classList.add('active');
+}
+
+function closeMiniPlayer() {
+  videoPlayer.pause();
+  videoPlayer.src = '';
+  audioPlayer.pause();
+  audioPlayer.src = '';
+  imagePreview.src = '';
+  miniPlayerModal.classList.remove('active');
+}
+
+document.getElementById('close-player').addEventListener('click', closeMiniPlayer);
+
+miniPlayerModal.addEventListener('click', (e) => {
+  if (e.target.id === 'mini-player-modal') {
+    closeMiniPlayer();
+  }
+});
+
+// Add double-click handler to file items (delegated event)
+document.addEventListener('dblclick', (e) => {
+  const fileItem = e.target.closest('.file-item');
+  if (fileItem) {
+    const index = fileItem.dataset.index;
+    const file = currentFiles[index];
+    if (file) {
+      openMiniPlayer(file.path, file.name);
+    }
+  }
+});
+
 // ── Convert button ────────────────────────────────────────────────────────────
 // Toolbar convert button
 document.getElementById('btn-convert').addEventListener('click', async () => {
@@ -564,10 +704,15 @@ document.getElementById('btn-convert').addEventListener('click', async () => {
   modalBtn.textContent = 'Convirtiendo...';
 
   const outputFormat = document.getElementById('output-format')?.value;
-  const quality = document.getElementById('quality')?.value;
+  let quality = document.getElementById('quality')?.value;
   const resolution = document.getElementById('resolution')?.value || 'original';
   const openFolder = document.getElementById('chk-open-folder').checked;
   const concurrentConversions = parseInt(document.getElementById('concurrent-conversions').value);
+
+  // Convert quality to number for image/compress types (slider values)
+  if (currentConversionType === 'image' || currentConversionType === 'compress') {
+    quality = parseInt(quality) || 80;
+  }
 
   // Build conversion queue
   conversionQueue = currentFiles.map((file, index) => ({
@@ -622,10 +767,15 @@ document.getElementById('modal-btn-convert').addEventListener('click', async () 
   modalBtn.textContent = 'Convirtiendo...';
 
   const outputFormat = document.getElementById('output-format')?.value;
-  const quality = document.getElementById('quality')?.value;
+  let quality = document.getElementById('quality')?.value;
   const resolution = document.getElementById('resolution')?.value || 'original';
   const openFolder = document.getElementById('chk-open-folder').checked;
   const concurrentConversions = parseInt(document.getElementById('concurrent-conversions').value);
+
+  // Convert quality to number for image/compress types (slider values)
+  if (currentConversionType === 'image' || currentConversionType === 'compress') {
+    quality = parseInt(quality) || 80;
+  }
 
   // Build conversion queue
   conversionQueue = currentFiles.map((file, index) => ({
