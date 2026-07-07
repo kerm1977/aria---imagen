@@ -1,0 +1,21 @@
+{
+  "name": "aria-converter",
+  "version": "1.0.0",
+  "description": "ARIA - CONVERTER: Convertidor de formatos multimedia y documentos",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": ["converter", "ffmpeg", "video", "audio", "image", "pdf"],
+  "author": "kerm1977",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.0.12",
+    "fluent-ffmpeg": "^2.1.2",
+    "sharp": "^0.33.0",
+    "libreoffice-convert": "^1.6.0"
+  }
+}
