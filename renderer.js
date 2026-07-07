@@ -13,6 +13,58 @@ let ffmpegSettings = {
   fastDecode: false
 };
 let confirmCallback = null;
+let consolePanelVisible = false;
+
+// ── Console/Logs Panel ───────────────────────────────────────────────────────
+function addLog(message, type = 'info') {
+  const consoleContent = document.getElementById('console-content');
+  const timestamp = new Date().toLocaleTimeString();
+  const logEntry = document.createElement('div');
+  logEntry.className = `log-entry log-${type}`;
+  logEntry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> ${message}`;
+  consoleContent.appendChild(logEntry);
+  consoleContent.scrollTop = consoleContent.scrollHeight;
+}
+
+document.getElementById('btn-console').addEventListener('click', () => {
+  const consolePanel = document.getElementById('console-panel');
+  consolePanelVisible = !consolePanelVisible;
+  consolePanel.classList.toggle('active', consolePanelVisible);
+  addLog('Panel de consola ' + (consolePanelVisible ? 'abierto' : 'cerrado'), 'info');
+});
+
+document.getElementById('btn-close-console').addEventListener('click', () => {
+  const consolePanel = document.getElementById('console-panel');
+  consolePanelVisible = false;
+  consolePanel.classList.remove('active');
+  addLog('Panel de consola cerrado', 'info');
+});
+
+document.getElementById('btn-clear-logs').addEventListener('click', () => {
+  const consoleContent = document.getElementById('console-content');
+  consoleContent.innerHTML = '';
+  addLog('Logs limpiados', 'info');
+});
+
+// Intercept console.log, console.error, console.warn
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+
+console.log = function(...args) {
+  originalLog.apply(console, args);
+  addLog(args.join(' '), 'info');
+};
+
+console.error = function(...args) {
+  originalError.apply(console, args);
+  addLog(args.join(' '), 'error');
+};
+
+console.warn = function(...args) {
+  originalWarn.apply(console, args);
+  addLog(args.join(' '), 'warning');
+};
 
 // ── Window controls ───────────────────────────────────────────────────────────
 document.getElementById('winMinimize').addEventListener('click', () => window.api.windowMinimize());
@@ -658,29 +710,50 @@ function updateControlButtons(converting, paused = false) {
 }
 
 async function processConversionQueue(concurrentConversions) {
+  console.log(`[ANTI-CRASH] Starting conversion queue with ${concurrentConversions} concurrent conversions`);
+
   while (conversionQueue.length > 0 && isConverting) {
     const batch = conversionQueue.splice(0, concurrentConversions);
+    console.log(`[ANTI-CRASH] Processing batch of ${batch.length} files`);
+
     const promises = batch.map(task => {
       const file = currentFiles[task.index];
       file.status = 'Convirtiendo...';
       updateFileProgress(task.index, 0);
 
-      return performConversion(task.file, task.outputFormat, task.quality, task.index, task.conversionType, task.resolution, ffmpegSettings)
+      // Anti-crash: Wrap each conversion in timeout protection
+      return Promise.race([
+        performConversion(task.file, task.outputFormat, task.quality, task.index, task.conversionType, task.resolution, ffmpegSettings),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout: Conversión excedió tiempo límite')), 60000) // 60 seconds per file
+        )
+      ])
         .then(() => {
           file.status = 'Completado';
           file.progress = 100;
           updateFileProgress(task.index, 100);
+          console.log(`[ANTI-CRASH] File completed: ${file.name}`);
         })
         .catch(err => {
-          console.error('Conversion failed for file:', file.name, err);
+          console.error(`[ANTI-CRASH] Conversion failed for file: ${file.name}`, err);
           file.status = 'Error: ' + (err.message || 'Error desconocido');
           updateFileProgress(task.index, file.progress);
+          addLog(`Error convirtiendo ${file.name}: ${err.message}`, 'error');
         });
     });
 
     activePromises = promises;
     await Promise.allSettled(promises); // Use allSettled to continue even if some fail
+
+    console.log(`[ANTI-CRASH] Batch completed, remaining files: ${conversionQueue.length}`);
+
+    // Anti-crash: Small delay between batches to prevent memory buildup
+    if (conversionQueue.length > 0) {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+    }
   }
+
+  console.log('[ANTI-CRASH] Conversion queue completed');
 }
 
 function updateFileProgress(index, progress) {
@@ -700,6 +773,9 @@ function updateFileProgress(index, progress) {
 }
 
 async function performConversion(file, outputFormat, quality, fileIndex, conversionType, resolution, ffmpegSettings) {
+  console.log(`[CONVERSION] Iniciando conversión: ${file.name} -> ${outputFormat}`);
+  console.log(`[CONVERSION] Tipo: ${conversionType}, Calidad: ${quality}, Resolución: ${resolution}`);
+
   // Listen for progress updates
   const progressListener = (event, data) => {
     if (data && data.index === fileIndex) {
@@ -713,9 +789,10 @@ async function performConversion(file, outputFormat, quality, fileIndex, convers
   try {
     // Call main process to perform conversion
     const result = await window.api.performConversion(file, outputFormat, quality, outputFolder, fileIndex, conversionType, resolution, ffmpegSettings);
+    console.log(`[CONVERSION] Conversión completada: ${file.name}`);
     return result;
   } catch (error) {
-    console.error('Conversion error in performConversion:', error);
+    console.error(`[CONVERSION ERROR] ${file.name}:`, error.message);
     throw error;
   } finally {
     window.api.removeConversionProgressListener(progressListener);

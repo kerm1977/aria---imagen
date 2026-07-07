@@ -133,6 +133,15 @@ ipcMain.handle('stop-conversions', async (event) => {
   return { success: true };
 });
 
+// Open DevTools handler
+ipcMain.handle('open-dev-tools', async () => {
+  const focusedWindow = BrowserWindow.getFocusedWindow();
+  if (focusedWindow) {
+    focusedWindow.webContents.openDevTools();
+  }
+  return { success: true };
+});
+
 // Perform conversion handler
 ipcMain.handle('perform-conversion', async (event, file, outputFormat, quality, outputFolder, fileIndex, conversionType, resolution, ffmpegSettings) => {
   // Determine output path
@@ -416,78 +425,78 @@ function extractAudio(inputPath, outputPath, outputFormat, quality, event, fileI
   });
 }
 
-// Image conversion with Sharp
+// Image conversion with FFmpeg (more stable than Sharp)
 function convertImage(inputPath, outputPath, outputFormat, quality, event, fileIndex) {
   return new Promise((resolve, reject) => {
-    const sharp = require('sharp');
+    const ffmpeg = require('fluent-ffmpeg');
     const qualityMap = {
-      'low': 60,
-      'medium': 80,
-      'high': 95
+      'low': 2,
+      'medium': 5,
+      'high': 10
     };
 
-    const q = qualityMap[quality] || 80;
+    const q = qualityMap[quality] || 5;
 
-    // Add progress simulation
-    event.sender.send('conversion-progress', {
-      index: fileIndex,
-      progress: 25
-    });
+    console.log(`[FFMPEG-IMAGE] Starting image conversion: ${inputPath} -> ${outputFormat}`);
 
-    // Sharp supports: jpeg, png, webp, tiff, gif, avif, heif
-    let sharpInstance = sharp(inputPath);
+    // FFmpeg codec mapping for images
+    const codecMap = {
+      'jpg': 'mjpeg',
+      'jpeg': 'mjpeg',
+      'png': 'png',
+      'webp': 'libwebp',
+      'tiff': 'tiff',
+      'gif': 'gif',
+      'bmp': 'bmp'
+    };
 
-    // Format-specific options
-    const formatOptions = { quality: q };
+    const codec = codecMap[outputFormat] || 'mjpeg';
 
-    if (outputFormat === 'png') {
-      formatOptions.compressionLevel = 6; // Reduced from 9 to avoid memory issues
-      formatOptions.adaptiveFiltering = false; // Disabled to reduce memory
-    }
+    let command = ffmpeg(inputPath)
+      .output(outputPath)
+      .videoCodec(codec)
+      .outputOptions([
+        '-q:v', q.toString(), // Quality parameter
+        '-y' // Overwrite output
+      ]);
+
+    // Add format-specific options
     if (outputFormat === 'webp') {
-      formatOptions.effort = 4; // Reduced from 6
+      command = command.outputOptions(['-compression_level', '4']);
     }
-    if (outputFormat === 'tiff') {
-      formatOptions.compression = 'lzw';
-    }
-    if (outputFormat === 'avif') {
-      formatOptions.effort = 4; // Reduced from 6
-    }
-    if (outputFormat === 'heif') {
-      formatOptions.compression = 'hevc';
+    if (outputFormat === 'png') {
+      command = command.outputOptions(['-compression_level', '6']);
     }
 
-    event.sender.send('conversion-progress', {
-      index: fileIndex,
-      progress: 50
-    });
-
-    // Use metadata to get image info first (safer)
-    sharpInstance
-      .metadata()
-      .then(metadata => {
+    command
+      .on('start', (commandLine) => {
+        console.log('FFmpeg command:', commandLine);
         event.sender.send('conversion-progress', {
           index: fileIndex,
-          progress: 75
+          progress: 25
         });
-
-        // Create new instance for conversion (avoid reusing)
-        return sharp(inputPath)
-          .toFormat(outputFormat, formatOptions)
-          .toFile(outputPath);
       })
-      .then(() => {
-        console.log('Image conversion completed');
+      .on('progress', (progress) => {
+        if (progress.percent) {
+          event.sender.send('conversion-progress', {
+            index: fileIndex,
+            progress: Math.min(75, Math.round(progress.percent))
+          });
+        }
+      })
+      .on('end', () => {
+        console.log('[FFMPEG-IMAGE] Image conversion completed');
         event.sender.send('conversion-progress', {
           index: fileIndex,
           progress: 100
         });
         resolve();
       })
-      .catch(err => {
-        console.error('Image conversion error:', err);
-        reject(err);
-      });
+      .on('error', (err) => {
+        console.error('[FFMPEG-IMAGE] Image conversion error:', err);
+        reject(new Error(`Error de conversión: ${err.message}`));
+      })
+      .run();
   });
 }
 

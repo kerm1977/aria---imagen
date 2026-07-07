@@ -47,6 +47,11 @@
     Opciones
   </button>
 
+  <button class="btn btn-secondary" id="btn-console">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+    Consola
+  </button>
+
   <div class="separator"></div>
 
   <button class="btn btn-primary" id="btn-convert" disabled>
@@ -222,6 +227,20 @@
       <button class="btn btn-secondary" id="confirm-cancel">Cancelar</button>
       <button class="btn btn-danger" id="confirm-ok">Confirmar</button>
     </div>
+  </div>
+</div>
+
+<!-- Console/Logs Panel -->
+<div id="console-panel" class="console-panel">
+  <div class="console-header">
+    <h3>Consola de Logs</h3>
+    <div class="console-controls">
+      <button class="btn btn-secondary btn-sm" id="btn-clear-logs">Limpiar</button>
+      <button class="btn btn-secondary btn-sm" id="btn-close-console">Cerrar</button>
+    </div>
+  </div>
+  <div class="console-content" id="console-content">
+    <div class="log-entry log-info">[INFO] Sistema de logs iniciado</div>
   </div>
 </div>
 

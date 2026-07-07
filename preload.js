@@ -14,5 +14,6 @@ contextBridge.exposeInMainWorld('api', {
   openFolder: (folderPath) => ipcRenderer.invoke('open-folder', folderPath),
   pauseConversions: () => ipcRenderer.invoke('pause-conversions'),
   resumeConversions: () => ipcRenderer.invoke('resume-conversions'),
-  stopConversions: () => ipcRenderer.invoke('stop-conversions')
+  stopConversions: () => ipcRenderer.invoke('stop-conversions'),
+  openDevTools: () => ipcRenderer.invoke('open-dev-tools')
 });
